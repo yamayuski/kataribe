@@ -79,7 +79,20 @@ dist/
   index.d.ts (and related .d.ts files)
 ```
 
-## CI
+## Development
+
+### DevContainer
+
+The repository includes a DevContainer configuration for a consistent development environment:
+
+- **Node.js 20** (primary runtime)
+- **Deno** and **Bun** (additional JavaScript runtimes)  
+- **Biome** VS Code extension for formatting and linting
+- **Pre-configured** VS Code settings and port forwarding
+
+To use: Open in VS Code → "Reopen in Container"
+
+### CI
 
 GitHub Actions: Node 24, biome ci, build. Publish step scaffolded (commented).
 
