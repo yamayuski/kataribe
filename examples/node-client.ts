@@ -1,4 +1,3 @@
-import ws from "ws";
 import { createWsClient } from "../src/index.ts";
 import { contract } from "./contract.ts";
 
@@ -15,7 +14,6 @@ async function main() {
     runtime: {
       timeoutMs: 4000,
     },
-    wsImpl: ws,
   });
 
   const { sum } = await client.rpc.add({ a: 10, b: 8 });
