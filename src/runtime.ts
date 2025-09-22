@@ -410,7 +410,7 @@ export function createServerRuntime<C extends ContractShape>(
             handlers.events?.[name as keyof typeof handlers.events];
           if (!handler) return;
           try {
-            await handler(env.p as any, env);
+            await handler(env.p as C["events"][typeof name], env);
           } catch (e) {
             logger.error("event handler error", e);
           }
