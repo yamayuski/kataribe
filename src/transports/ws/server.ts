@@ -45,7 +45,7 @@ export async function createWsServer<C extends ContractShape>(
     (cb) => {
       wss.on("connection", (socket: unknown) => {
         const transport = new WebSocketTransport({
-          existing: socket as any,
+          existing: socket as unknown,
         });
         cb(transport);
       });
