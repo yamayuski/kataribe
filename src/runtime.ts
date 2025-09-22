@@ -363,7 +363,10 @@ export function createServerRuntime<C extends ContractShape>(
             const reqPayload = descriptor.validateReq
               ? descriptor.validateReq(env.p)
               : env.p;
-            const result = await impl(reqPayload as any, env);
+            const result = await impl(
+              reqPayload as Parameters<typeof impl>[0],
+              env
+            );
             const resPayload = descriptor.validateRes
               ? descriptor.validateRes(result)
               : result;
