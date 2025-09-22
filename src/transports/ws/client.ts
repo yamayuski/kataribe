@@ -1,15 +1,15 @@
-import { createClientRuntime } from "../../runtime.mts";
+import { createClientRuntime } from "../../runtime.ts";
 
 import type {
   ClientWithServerRpc,
   ContractShape,
   RpcToClientHandlerMap,
   RuntimeOptions,
-} from "../../types.mts";
+} from "../../types.ts";
 import {
   WebSocketTransport,
   type WebSocketTransportOptions,
-} from "./transport.mts";
+} from "./transport.ts";
 
 export interface WsClientParams<C extends ContractShape>
   extends WebSocketTransportOptions {

@@ -1,5 +1,5 @@
-import { createWsClient } from "../src/transports/ws/client.mts";
-import { contract } from "./contract.mts";
+import { createWsClient } from "../src/index.ts";
+import { contract } from "./contract.ts";
 
 async function run() {
   const client = await createWsClient({

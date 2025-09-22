@@ -1,12 +1,12 @@
-import { createServerRuntime } from "../../runtime.mts";
+import { createServerRuntime } from "../../runtime.ts";
 import type {
   ContractShape,
   EventHandlerMap,
   RpcToServerHandlerMap,
   RuntimeOptions,
   RuntimeServer,
-} from "../../types.mts";
-import { WebSocketTransport } from "./transport.mts";
+} from "../../types.ts";
+import { WebSocketTransport } from "./transport.ts";
 
 export interface WsServerParams<C extends ContractShape> {
   contract: C;

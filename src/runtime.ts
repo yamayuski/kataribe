@@ -13,14 +13,14 @@ import type {
   RuntimeOptions,
   ServerConnection,
   Transport,
-} from "./types.mts";
+} from "./types.ts";
 import {
   createLogger,
   defaultGenerateId,
   makeBaseEnvelope,
   parseJson,
   runMiddlewares,
-} from "./utils.mts";
+} from "./utils.ts";
 
 interface PendingEntry {
   resolve: (value: unknown) => void;

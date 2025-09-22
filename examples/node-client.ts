@@ -1,5 +1,5 @@
-import { createWsClient } from "../src/transports/ws/client.mts";
-import { contract } from "./contract.mts";
+import { createWsClient } from "../src/index.ts";
+import { contract } from "./contract.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ws = require("ws");

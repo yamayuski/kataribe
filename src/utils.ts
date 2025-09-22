@@ -1,4 +1,4 @@
-import type { Envelope, Middleware, RuntimeOptions } from "./types.mts";
+import type { Envelope, Middleware, RuntimeOptions } from "./types.ts";
 
 export function defaultGenerateId(): string {
   return Math.random().toString(36).slice(2, 10);

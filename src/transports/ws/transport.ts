@@ -1,4 +1,4 @@
-import type { Transport } from "../../types.mts";
+import type { Transport } from "../../types.ts";
 
 export interface WebSocketTransportOptions {
   url?: string;
