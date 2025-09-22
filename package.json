@@ -1,0 +1,57 @@
+{
+  "name": "kataribe",
+  "version": "0.1.0",
+  "description": "Bidirectional (client↔server) RPC + events over WebSocket with type-safe unknown-only envelopes.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "npx rimraf dist",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:esm": "esbuild src/index.mts --bundle --format=esm --platform=neutral --sourcemap --outfile=dist/index.mjs",
+    "build:cjs": "esbuild src/index.mts --bundle --format=cjs --platform=node --sourcemap --outfile=dist/index.cjs",
+    "build:umd": "esbuild src/index.mts --bundle --format=iife --global-name=Kataribe --platform=browser --sourcemap --outfile=dist/kataribe.umd.js",
+    "build": "npm run clean && npm run build:types && npm run build:esm && npm run build:cjs && npm run build:umd",
+    "format": "biome check --write --unsafe",
+    "lint": "biome lint",
+    "check": "biome ci",
+    "dev:server": "tsx examples/server.ts",
+    "dev:client": "tsx examples/node-client.ts"
+  },
+  "keywords": [
+    "rpc",
+    "websocket",
+    "typescript",
+    "bidirectional",
+    "events",
+    "envelope"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.4",
+    "@types/node": "^24.5.2",
+    "@types/ws": "^8.18.1",
+    "esbuild": "^0.25.10",
+    "tsx": "^4.20.5",
+    "typescript": "~5.9.2"
+  },
+  "dependencies": {
+    "ws": "^8.18.3"
+  }
+}
