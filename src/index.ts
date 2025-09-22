@@ -1,4 +1,7 @@
 export * from "./runtime.ts";
+export * from "./transports/webrtc/client.ts";
+export * from "./transports/webrtc/signaling.ts";
+export * from "./transports/webrtc/transport.ts";
 export * from "./transports/ws/client.ts";
 export * from "./transports/ws/server.ts";
 export * from "./transports/ws/transport.ts";

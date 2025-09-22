@@ -30,7 +30,8 @@
     "lint": "biome lint",
     "check": "biome ci",
     "dev:server": "tsx examples/node-server.ts",
-    "dev:client": "tsx examples/node-client.ts"
+    "dev:client": "tsx examples/node-client.ts",
+    "dev:webrtc-signaling": "tsx examples/webrtc-signaling-server.ts"
   },
   "keywords": [
     "rpc",

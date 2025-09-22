@@ -10,6 +10,7 @@ Bidirectional (client ↔ server) RPC + fire-and-forget events over WebSocket wi
 - Middleware (in/out) for auth, tracing, compression hooks.
 - No `any` in source; strict generics.
 - WebSocket transport (browser + Node `ws`).
+- **WebRTC DataChannel transport for browser P2P communication**.
 - Bundled outputs: ESM, CJS, UMD + type declarations.
 - Biome for lint/format/ci.
 
@@ -68,6 +69,7 @@ console.log(sum);
 | check | Biome lint+format verification |
 | dev:server | Run example server |
 | dev:client | Run example node client |
+| dev:webrtc-signaling | Run WebRTC signaling server |
 
 ## Build Outputs
 
@@ -98,7 +100,8 @@ GitHub Actions: Node 24, biome ci, build. Publish step scaffolded (commented).
 
 ## Roadmap
 
-- Additional transports: WebRTC / WebTransport / HTTP/2
+- ~~WebRTC DataChannel transport~~ ✅ **DONE**
+- Additional transports: WebTransport / HTTP/2
 - Stream RPC (chunked)
 - RPC cancellation (rpc_cancel)
 - Schema integration (zod/valibot)
