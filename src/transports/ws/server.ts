@@ -23,12 +23,21 @@ export async function createWsServer<C extends ContractShape>(
   params: WsServerParams<C>,
 ): Promise<RuntimeServer<C>> {
   const { contract, handlers, runtime, wssOptions, wsImpl } = params;
-  const wsModule = wsImpl
-    ? wsImpl
-    : (await import("ws")) as {
-        Server: new (opts: { port: number }) => unknown;
-      };
-  const wss = new wsModule.Server(wssOptions) as {
+  let wsModule: any;
+  
+  if (wsImpl) {
+    wsModule = wsImpl;
+  } else {
+    try {
+      const imported = await import("ws");
+      // Use the full import, not the default
+      wsModule = imported;
+    } catch (error) {
+      throw new Error(`Failed to import 'ws' module: ${error}`);
+    }
+  }
+  
+  const wss = new (wsModule.Server || wsModule.WebSocketServer)(wssOptions) as {
     on(event: "connection", cb: (socket: unknown) => void): void;
     close(): void;
   };
@@ -37,7 +46,7 @@ export async function createWsServer<C extends ContractShape>(
     (cb) => {
       wss.on("connection", (socket: unknown) => {
         const transport = new WebSocketTransport({
-          existing: socket as unknown,
+          existing: socket as any,
         });
         cb(transport);
       });

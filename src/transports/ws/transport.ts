@@ -57,10 +57,16 @@ export class WebSocketTransport implements Transport {
     let impl: unknown;
     if (this.opts.wsImpl) {
       impl = this.opts.wsImpl;
-    } else if (typeof require === "function") {
-      impl = require("ws");
     } else {
-      throw new Error("WebSocket implementation not found: 'wsImpl' not provided and 'require' is unavailable.");
+      try {
+        // Try to use require if available (Node.js environment)
+        impl = (globalThis as any).require?.("ws");
+        if (!impl) {
+          throw new Error("require not available");
+        }
+      } catch {
+        throw new Error("WebSocket implementation not found: 'wsImpl' not provided and 'require' is unavailable.");
+      }
     }
     return new (impl as WsCtor)(url, protocols);
   }

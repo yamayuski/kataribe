@@ -153,7 +153,7 @@ export function createClientRuntime<C extends ContractShape>(
           const reqPayload = descriptor.validateReq
             ? descriptor.validateReq(env.p)
             : env.p;
-          const res = await impl(reqPayload, env);
+          const res = await impl(reqPayload as any, env);
           const resPayload = descriptor.validateRes
             ? descriptor.validateRes(res)
             : res;
@@ -363,7 +363,7 @@ export function createServerRuntime<C extends ContractShape>(
             const reqPayload = descriptor.validateReq
               ? descriptor.validateReq(env.p)
               : env.p;
-            const result = await impl(reqPayload, env);
+            const result = await impl(reqPayload as any, env);
             const resPayload = descriptor.validateRes
               ? descriptor.validateRes(result)
               : result;
@@ -407,7 +407,7 @@ export function createServerRuntime<C extends ContractShape>(
             handlers.events?.[name as keyof typeof handlers.events];
           if (!handler) return;
           try {
-            await handler(env.p, env);
+            await handler(env.p as any, env);
           } catch (e) {
             logger.error("event handler error", e);
           }
