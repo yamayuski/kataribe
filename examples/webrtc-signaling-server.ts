@@ -12,7 +12,9 @@ async function main() {
   });
 
   console.log("WebRTC Signaling Server listening on port 3001");
-  console.log("Open two browser tabs to examples/webrtc-peer.html to test P2P connection");
+  console.log(
+    "Open two browser tabs to examples/webrtc-peer.html to test P2P connection",
+  );
 
   process.on("SIGINT", () => {
     console.log("\nShutting down signaling server...");

@@ -35,12 +35,16 @@ This document provides comprehensive guidance for GitHub Copilot coding agents w
 │   ├── types.ts           # Type definitions
 │   ├── utils.ts           # Utility functions
 │   └── transports/        # Transport implementations
-│       └── ws/            # WebSocket transport
+│       ├── ws/            # WebSocket transport
+│       └── webrtc/        # WebRTC DataChannel transport
 ├── examples/              # Example implementations
 │   ├── contract.ts        # Contract definition example
 │   ├── node-server.ts     # Node.js server example
 │   ├── node-client.ts     # Node.js client example
-│   └── browser-client.ts  # Browser client example
+│   ├── browser-client.ts  # Browser client example
+│   ├── webrtc-signaling-server.ts  # WebRTC signaling server
+│   ├── webrtc-peer.html   # WebRTC browser P2P demo
+│   └── webrtc-node-client.ts       # WebRTC Node.js example
 ├── dist/                  # Build outputs (generated)
 └── package.json           # Package configuration
 ```
@@ -62,6 +66,7 @@ This document provides comprehensive guidance for GitHub Copilot coding agents w
 | `check` | Run Biome CI checks | `npm run check` |
 | `dev:server` | Run example server | `npm run dev:server` |
 | `dev:client` | Run example node client | `npm run dev:client` |
+| `dev:webrtc-signaling` | Run WebRTC signaling server | `npm run dev:webrtc-signaling` |
 
 ### Development Process
 1. **Install dependencies**: `npm install`
@@ -194,7 +199,8 @@ When working on this repository, always use the provided npm scripts:
 ## Roadmap Features
 
 When implementing new features, consider these planned additions:
-- Additional transports: WebRTC / WebTransport / HTTP/2
+- ~~WebRTC DataChannel transport~~ ✅ **IMPLEMENTED**
+- Additional transports: WebTransport / HTTP/2
 - Stream RPC (chunked)
 - RPC cancellation (rpc_cancel)
 - Schema integration (zod/valibot)
