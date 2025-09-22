@@ -25,9 +25,9 @@ export async function createWsServer<C extends ContractShape>(
   const { contract, handlers, runtime, wssOptions, wsImpl } = params;
   const wsModule = wsImpl
     ? wsImpl
-    : (await import("ws")) as {
+    : ((await import("ws")) as {
         Server: new (opts: { port: number }) => unknown;
-      };
+      });
   const wss = new wsModule.Server(wssOptions) as {
     on(event: "connection", cb: (socket: unknown) => void): void;
     close(): void;

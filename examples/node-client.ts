@@ -1,6 +1,6 @@
+import ws from "ws";
 import { createWsClient } from "../src/index.ts";
 import { contract } from "./contract.ts";
-import ws from "ws";
 
 async function main() {
   const client = await createWsClient({
