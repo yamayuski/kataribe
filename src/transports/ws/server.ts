@@ -23,12 +23,21 @@ export async function createWsServer<C extends ContractShape>(
   params: WsServerParams<C>,
 ): Promise<RuntimeServer<C>> {
   const { contract, handlers, runtime, wssOptions, wsImpl } = params;
-  const wsModule = wsImpl
-    ? wsImpl
-    : ((await import("ws")) as {
-        Server: new (opts: { port: number }) => unknown;
-      });
-  const wss = new wsModule.Server(wssOptions) as {
+  // biome-ignore lint/suspicious/noExplicitAny: WebSocket module typing requires any
+  let wsModule: any;
+
+  if (wsImpl) {
+    wsModule = wsImpl;
+  } else {
+    try {
+      // Use string literal to avoid TypeScript module resolution during compilation
+      wsModule = await import("ws");
+    } catch (error) {
+      throw new Error(`Failed to import 'ws' module: ${error}`);
+    }
+  }
+
+  const wss = new (wsModule.Server || wsModule.WebSocketServer)(wssOptions) as {
     on(event: "connection", cb: (socket: unknown) => void): void;
     close(): void;
   };
@@ -37,7 +46,8 @@ export async function createWsServer<C extends ContractShape>(
     (cb) => {
       wss.on("connection", (socket: unknown) => {
         const transport = new WebSocketTransport({
-          existing: socket as unknown,
+          // biome-ignore lint/suspicious/noExplicitAny: WebSocket instance typing requires any
+          existing: socket as any,
         });
         cb(transport);
       });
