@@ -1,6 +1,3 @@
-import type WebSocket from "isomorphic-ws";
-import { WebSocketServer } from "ws";
-import { createServerRuntime } from "@kataribe/core";
 import type {
   ContractShape,
   EventHandlerMap,
@@ -8,6 +5,9 @@ import type {
   RuntimeOptions,
   RuntimeServer,
 } from "@kataribe/core";
+import { createServerRuntime } from "@kataribe/core";
+import type WebSocket from "isomorphic-ws";
+import { WebSocketServer } from "ws";
 import { WebSocketTransport } from "./transport.ts";
 
 export interface WsServerParams<C extends ContractShape> {

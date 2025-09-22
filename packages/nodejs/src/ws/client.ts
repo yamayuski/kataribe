@@ -1,11 +1,10 @@
-import { createClientRuntime } from "@kataribe/core";
-
 import type {
   ClientWithServerRpc,
   ContractShape,
   RpcToClientHandlerMap,
   RuntimeOptions,
 } from "@kataribe/core";
+import { createClientRuntime } from "@kataribe/core";
 import {
   WebSocketTransport,
   type WebSocketTransportOptions,

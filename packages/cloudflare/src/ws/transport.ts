@@ -1,36 +1,30 @@
 import type { Transport } from "@kataribe/core";
 
-export interface WebSocketTransportOptions {
-  url?: string;
-  existing?: WebSocket;
-  protocols?: string | string[];
+export interface CloudflareWebSocketTransportOptions {
+  webSocket: WebSocket;
   onOpen?: () => void;
-  onClose?: (ev: CloseEvent) => void;
-  onError?: (err: Event) => void;
+  onClose?: (code?: number, reason?: string) => void;
+  onError?: (err: unknown) => void;
 }
 
-export class WebSocketTransport implements Transport {
+export class CloudflareWebSocketTransport implements Transport {
   private socket: WebSocket;
   private listeners = new Set<(data: unknown) => void>();
-  private opts: WebSocketTransportOptions;
+  private opts: CloudflareWebSocketTransportOptions;
 
-  constructor(options: WebSocketTransportOptions) {
+  constructor(options: CloudflareWebSocketTransportOptions) {
     this.opts = options;
+    this.socket = options.webSocket;
 
-    if (options.existing) {
-      this.socket = options.existing;
-    } else if (options.url) {
-      this.socket = new WebSocket(options.url, options.protocols);
-    } else {
-      throw new Error("Either 'url' or 'existing' WebSocket must be provided");
-    }
+    // Accept the WebSocket connection
+    this.socket.accept();
 
     this.socket.addEventListener("open", () => {
       this.opts.onOpen?.();
     });
 
     this.socket.addEventListener("close", (ev) => {
-      this.opts.onClose?.(ev);
+      this.opts.onClose?.(ev.code, ev.reason);
     });
 
     this.socket.addEventListener("error", (err) => {
@@ -38,9 +32,8 @@ export class WebSocketTransport implements Transport {
     });
 
     this.socket.addEventListener("message", (ev) => {
-      const data = typeof ev.data === "string" ? ev.data : ev.data;
       for (const listener of this.listeners) {
-        listener(data);
+        listener(ev.data);
       }
     });
   }

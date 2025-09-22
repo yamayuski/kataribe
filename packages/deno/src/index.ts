@@ -3,4 +3,8 @@ export * from "./webrtc/client.ts";
 export * from "./webrtc/signaling.ts";
 export * from "./webrtc/transport.ts";
 export * from "./ws/client.ts";
+export * from "./ws/server.ts";
 export * from "./ws/transport.ts";
+export * from "./wt/client.ts";
+export * from "./wt/server.ts";
+export * from "./wt/transport.ts";

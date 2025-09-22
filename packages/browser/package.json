@@ -31,7 +31,7 @@
   "keywords": [
     "rpc",
     "websocket",
-    "webrtc", 
+    "webrtc",
     "webtransport",
     "browser",
     "typescript"

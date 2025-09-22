@@ -25,27 +25,23 @@ export async function createWsClient<C extends ContractShape>(
   // Wait for connection if URL provided
   if (params.url && !params.existing) {
     await new Promise<void>((resolve, reject) => {
-      const originalOnOpen = params.onOpen;
-      const originalOnError = params.onError;
-
-      transport.onMessage(() => {}); // Initialize transport
-
-      const cleanup = () => {
-        transport.close();
-      };
+      const timeout = setTimeout(() => {
+        reject(new Error("WebSocket connection timeout"));
+      }, 10000);
 
       const onOpen = () => {
-        originalOnOpen?.();
+        clearTimeout(timeout);
+        params.onOpen?.();
         resolve();
       };
 
       const onError = (err: Event) => {
-        originalOnError?.(err);
-        cleanup();
+        clearTimeout(timeout);
+        params.onError?.(err);
         reject(new Error("WebSocket connection failed"));
       };
 
-      // Override callbacks temporarily
+      transport.onMessage(() => {}); // Initialize
       (transport as any).opts.onOpen = onOpen;
       (transport as any).opts.onError = onError;
     });

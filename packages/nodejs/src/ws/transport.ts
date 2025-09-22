@@ -1,5 +1,5 @@
-import WebSocket from "isomorphic-ws";
 import type { Transport } from "@kataribe/core";
+import WebSocket from "isomorphic-ws";
 
 export interface WebSocketTransportOptions {
   url?: string;
