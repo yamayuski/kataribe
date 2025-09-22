@@ -153,7 +153,7 @@ export function createClientRuntime<C extends ContractShape>(
           const reqPayload = descriptor.validateReq
             ? descriptor.validateReq(env.p)
             : env.p;
-          const res = await impl(reqPayload as any, env);
+          const res = await impl(reqPayload as RpcToClientMethods[typeof method][0], env);
           const resPayload = descriptor.validateRes
             ? descriptor.validateRes(res)
             : res;
