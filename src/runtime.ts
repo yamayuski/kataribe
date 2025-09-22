@@ -64,7 +64,7 @@ function buildRpcCaller(
           : undefined;
         pending.set(id, { resolve, reject, timer });
       });
-      runMiddlewares?.(middlewares, env, "out")
+      runMiddlewares(middlewares, env, "out")
         .then(() => sendEnvelope(env))
         .catch((err) => {
           const p = pending.get(id);
