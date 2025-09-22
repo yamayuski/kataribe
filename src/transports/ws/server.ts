@@ -30,7 +30,7 @@ export async function createWsServer<C extends ContractShape>(
   } else {
     try {
       // Use string literal to avoid TypeScript module resolution during compilation
-      wsModule = await import("ws" as any);
+      wsModule = await import("ws");
     } catch (error) {
       throw new Error(`Failed to import 'ws' module: ${error}`);
     }
