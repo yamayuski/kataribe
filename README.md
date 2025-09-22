@@ -81,7 +81,38 @@ dist/
   index.d.ts (and related .d.ts files)
 ```
 
+## Runtime Support
+
+### Server Runtimes
+
+|Runtime|WebSocket|WebRTC|WebTransport|
+|---|---|---|---|
+|node.js|✅|✅|✖|
+|Deno|✅|✅|✅(unstable)|
+|Cloudflare|✅|✅|✖|
+|Bun|✅|✅|✖|
+
+### Browsers
+
+- [WebSocket | Can I use... Support tables for HTML5, CSS3, etc](https://caniuse.com/mdn-api_websocket)
+- [RTCPeerConnection.prototype.createDataChannel | Can I use... Support tables for HTML5, CSS3, etc](https://caniuse.com/mdn-api_rtcpeerconnection_createdatachannel)
+- [WebTransport | Can I use... Support tables for HTML5, CSS3, etc](https://caniuse.com/webtransport)
+
 ## Development
+
+### SSL/TLS Setup for Examples
+
+For secure WebSocket (wss://) and HTTPS examples, generate SSL certificates using [mkcert](https://github.com/FiloSottile/mkcert):
+
+```bash
+# Install mkcert (if not already installed)
+# See: https://github.com/FiloSottile/mkcert#installation
+
+# Generate certificates
+mkcert -cert-file certs/localhost.pem -key-file certs/localhost-key.pem localhost 127.0.0.1 ::1
+```
+
+Example servers will use these certificates for secure communication.
 
 ### DevContainer
 

@@ -1,0 +1,51 @@
+{
+  "name": "@kataribe/deno",
+  "version": "0.1.0",
+  "description": "Deno implementation for kataribe - WebSocket, WebRTC, WebTransport",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "npx rimraf dist",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:esm": "esbuild src/index.ts --bundle --format=esm --platform=neutral --sourcemap --outfile=dist/index.mjs",
+    "build:cjs": "esbuild src/index.ts --bundle --format=cjs --platform=node --sourcemap --outfile=dist/index.cjs",
+    "build": "npm run clean && npm run build:types && npm run build:esm && npm run build:cjs",
+    "format": "biome check --write --unsafe",
+    "lint": "biome lint",
+    "check": "biome ci"
+  },
+  "keywords": [
+    "rpc",
+    "websocket",
+    "webrtc",
+    "webtransport",
+    "deno",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@kataribe/core": "^0.1.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.4",
+    "@types/node": "^24.5.2",
+    "esbuild": "^0.25.10",
+    "typescript": "~5.9.2"
+  }
+}
