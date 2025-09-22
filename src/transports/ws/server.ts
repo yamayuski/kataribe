@@ -23,7 +23,6 @@ export async function createWsServer<C extends ContractShape>(
   params: WsServerParams<C>,
 ): Promise<RuntimeServer<C>> {
   const { contract, handlers, runtime, wssOptions, wsImpl } = params;
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const wsModule = (wsImpl ?? require("ws")) as {
     Server: new (opts: { port: number }) => unknown;
   };
