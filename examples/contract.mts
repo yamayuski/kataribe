@@ -1,4 +1,4 @@
-import { defineContract } from "../src/index.mts";
+import { defineContract, event, rpc } from "../src/index.mts";
 
 function isNumber(x: unknown): x is number {
   return typeof x === "number" && !Number.isNaN(x);
