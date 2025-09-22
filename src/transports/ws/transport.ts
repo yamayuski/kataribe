@@ -54,9 +54,14 @@ export class WebSocketTransport implements Transport {
       return new WebSocket(url, protocols) as unknown as WebSocketLike;
     }
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const impl = (this.opts.wsImpl ?? require("ws")) as {
-      new (url: string, protocols?: string | string[]): unknown;
-    };
+    let impl: unknown;
+    if (this.opts.wsImpl) {
+      impl = this.opts.wsImpl;
+    } else if (typeof require === "function") {
+      impl = require("ws");
+    } else {
+      throw new Error("WebSocket implementation not found: 'wsImpl' not provided and 'require' is unavailable.");
+    }
     return new (impl as WsCtor)(url, protocols);
   }
 
