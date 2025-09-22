@@ -16,7 +16,8 @@
     "test": "npm test --workspaces",
     "dev:server": "tsx examples/nodejs-ws/server.ts",
     "dev:client": "tsx examples/nodejs-ws/client.ts",
-    "dev:webrtc-signaling": "tsx examples/nodejs-wrtc/signaling-server.ts"
+    "dev:deno": "deno run --allow-net examples/deno-ws/server.ts",
+    "dev:bun": "bun examples/bun-ws/server.ts"
   },
   "keywords": [
     "rpc",

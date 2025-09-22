@@ -1,4 +1,4 @@
-import { defineContract, event, rpc } from "../src/index.ts";
+import { defineContract, event, rpc } from "@kataribe/nodejs";
 
 function isNumber(x: unknown): x is number {
   return typeof x === "number" && !Number.isNaN(x);
