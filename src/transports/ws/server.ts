@@ -23,7 +23,7 @@ export async function createWsServer<C extends ContractShape>(
   params: WsServerParams<C>,
 ): Promise<RuntimeServer<C>> {
   const { contract, handlers, runtime, wssOptions, wsImpl } = params;
-  let wsModule: any;
+  let wsModule: unknown;
   
   if (wsImpl) {
     wsModule = wsImpl;
