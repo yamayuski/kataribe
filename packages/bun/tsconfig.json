@@ -3,7 +3,9 @@
   "compilerOptions": {
     "outDir": "./dist",
     "declaration": true,
-    "declarationDir": "./dist"
+    "declarationDir": "./dist",
+    "types": ["bun-types"],
+    "lib": ["es2022", "dom"]
   },
   "include": ["src/**/*"]
 }

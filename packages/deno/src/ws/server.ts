@@ -26,7 +26,7 @@ export async function createWsServer<C extends ContractShape>(
 
   return createServerRuntime(
     (onTransport) => {
-      Deno.serve({ port, hostname }, (req) => {
+      Deno.serve({ port, hostname }, (req: Request) => {
         if (req.headers.get("upgrade") !== "websocket") {
           return new Response(null, { status: 501 });
         }

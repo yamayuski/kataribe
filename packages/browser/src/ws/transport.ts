@@ -63,4 +63,11 @@ export class WebSocketTransport implements Transport {
   isOpen(): boolean {
     return this.socket.readyState === WebSocket.OPEN;
   }
+
+  // Method to update callbacks (for internal use)
+  updateCallbacks(callbacks: Partial<WebSocketTransportOptions>): void {
+    if (callbacks.onOpen) this.opts.onOpen = callbacks.onOpen;
+    if (callbacks.onClose) this.opts.onClose = callbacks.onClose;
+    if (callbacks.onError) this.opts.onError = callbacks.onError;
+  }
 }

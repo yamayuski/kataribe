@@ -42,7 +42,7 @@ export async function createWtServer<C extends ContractShape>(
           cert: Deno.readTextFileSync(certFile),
           key: Deno.readTextFileSync(keyFile),
         },
-        async (_req) => {
+        async (_req: Request) => {
           // WebTransport handshake would go here
           // This is a simplified placeholder
           throw new Error(

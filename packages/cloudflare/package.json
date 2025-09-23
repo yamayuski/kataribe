@@ -10,9 +10,9 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
@@ -43,8 +43,10 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
+    "@cloudflare/workers-types": "^4.20241218.0",
     "@types/node": "^24.5.2",
     "esbuild": "^0.25.10",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "wrangler": "^3.101.0"
   }
 }

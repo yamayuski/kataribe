@@ -10,8 +10,8 @@ export interface WebTransportTransportOptions {
 
 export class WebTransportTransport implements Transport {
   private stream: WebTransportBidirectionalStream;
-  private writer: WritableStreamDefaultWriter<Uint8Array>;
-  private reader: ReadableStreamDefaultReader<Uint8Array>;
+  private writer!: WritableStreamDefaultWriter<Uint8Array>;
+  private reader!: ReadableStreamDefaultReader<Uint8Array>;
   private listeners = new Set<(data: unknown) => void>();
   private decoder = new TextDecoder();
   private encoder = new TextEncoder();

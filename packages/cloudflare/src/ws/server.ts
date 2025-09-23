@@ -27,7 +27,7 @@ export function createCloudflareWsHandler<C extends ContractShape>(
   params: CloudflareWsServerParams<C>,
 ): (request: Request) => Response {
   const _runtime = createServerRuntime(
-    (onTransport) => {
+    (onTransport: (transport: CloudflareWebSocketTransport) => void) => {
       // This function will be called when we create a transport
       // We'll store the callback to use it later
       globalOnTransport = onTransport;
@@ -66,10 +66,9 @@ export function createCloudflareWsHandler<C extends ContractShape>(
 export class KataribeDurableObject {
   private runtime?: RuntimeServer<ContractShape>;
 
-  constructor(state: DurableObjectState) {
-    // State parameter is required by Cloudflare but we may not need to store it
-    // Store it to avoid unused parameter warning
-    this.state = state;
+  // biome-ignore lint/complexity/noUselessConstructor: Required by Cloudflare Durable Objects
+  constructor(_state: DurableObjectState) {
+    // State parameter is required by Cloudflare but we don't use it in this example
   }
 
   async fetch<C extends ContractShape>(
@@ -78,7 +77,7 @@ export class KataribeDurableObject {
   ): Promise<Response> {
     if (!this.runtime) {
       this.runtime = createServerRuntime(
-        (onTransport) => {
+        (onTransport: (transport: Transport) => void) => {
           this.handleWebSocket(request, onTransport);
         },
         params.contract,

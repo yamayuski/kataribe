@@ -46,8 +46,7 @@ export async function createWsClient<C extends ContractShape>(
       };
 
       // Override callbacks temporarily
-      transport.opts.onOpen = onOpen;
-      transport.opts.onError = onError;
+      transport.updateCallbacks({ onOpen, onError });
     });
   }
 

@@ -3,7 +3,9 @@
   "compilerOptions": {
     "outDir": "./dist",
     "declaration": true,
-    "declarationDir": "./dist"
+    "declarationDir": "./dist",
+    "lib": ["dom", "es2022"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "types": ["@types/node"]
 }

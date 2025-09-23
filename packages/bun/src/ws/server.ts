@@ -32,7 +32,7 @@ export async function createBunWsServer<C extends ContractShape>(
   >();
 
   const runtime = createServerRuntime(
-    (onTransport) => {
+    (onTransport: (transport: BunWebSocketTransport) => void) => {
       // Store the callback to use it when connections are established
       globalOnTransport = onTransport;
     },
@@ -45,7 +45,7 @@ export async function createBunWsServer<C extends ContractShape>(
     port,
     hostname,
     websocket: {
-      open(ws) {
+      open(ws: import("bun").ServerWebSocket) {
         const transport = new BunWebSocketTransport({ ws });
         connections.set(ws, transport);
 
@@ -54,27 +54,21 @@ export async function createBunWsServer<C extends ContractShape>(
           globalOnTransport(transport);
         }
       },
-      message(ws, message) {
+      message(ws: import("bun").ServerWebSocket, message: string | Buffer) {
         const transport = connections.get(ws);
         if (transport) {
           transport._dispatchMessage(message);
         }
       },
-      close(ws, code, reason) {
+      close(ws: import("bun").ServerWebSocket, code?: number, reason?: string) {
         const transport = connections.get(ws);
         if (transport) {
           transport._handleClose(code, reason);
           connections.delete(ws);
         }
       },
-      error(ws, error) {
-        const transport = connections.get(ws);
-        if (transport) {
-          transport._handleError(error);
-        }
-      },
     },
-    fetch(req, server) {
+    fetch(req: Request, server: import("bun").Server) {
       const _url = new URL(req.url);
 
       if (server.upgrade(req)) {

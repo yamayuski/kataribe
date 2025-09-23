@@ -3,7 +3,9 @@
   "compilerOptions": {
     "outDir": "./dist",
     "declaration": true,
-    "declarationDir": "./dist"
+    "declarationDir": "./dist",
+    "types": ["@cloudflare/workers-types"],
+    "lib": ["es2022", "webworker"]
   },
   "include": ["src/**/*"]
 }
