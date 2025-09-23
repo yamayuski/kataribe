@@ -172,7 +172,12 @@ When working on this repository, always use the provided npm scripts:
 - **Before making changes**: `npm run check` to verify current state
 - **During development**: `npm run format` to fix formatting
 - **Before committing**: `npm run build` to ensure everything builds
+- **Before pushing**: **ALWAYS run `npm run check`** to ensure no errors
 - **For testing**: Use `npm run dev:server` and `npm run dev:client`
+
+### Important: Pre-Push Validation
+
+**CRITICAL**: Always run `npm run check` before pushing changes to ensure no biome CI errors. This prevents CI failures and maintains code quality standards.
 
 ## CI/CD
 

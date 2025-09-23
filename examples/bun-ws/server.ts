@@ -24,8 +24,8 @@ server.onConnection(async (conn) => {
   console.log("New client connected to Bun server");
 
   try {
-    const response = await conn.callClient.notifyClient({ 
-      message: "Welcome to the Bun kataribe server!" 
+    const response = await conn.callClient.notifyClient({
+      message: "Welcome to the Bun kataribe server!",
     });
     console.log("Client received notification:", response.received);
   } catch (error) {

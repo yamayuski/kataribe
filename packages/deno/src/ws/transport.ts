@@ -45,6 +45,13 @@ export class WebSocketTransport implements Transport {
     });
   }
 
+  // Method to update callbacks (for internal use)
+  updateCallbacks(callbacks: Partial<WebSocketTransportOptions>): void {
+    if (callbacks.onOpen) this.opts.onOpen = callbacks.onOpen;
+    if (callbacks.onClose) this.opts.onClose = callbacks.onClose;
+    if (callbacks.onError) this.opts.onError = callbacks.onError;
+  }
+
   send(data: unknown): void {
     if (this.socket.readyState === WebSocket.OPEN) {
       this.socket.send(typeof data === "string" ? data : JSON.stringify(data));

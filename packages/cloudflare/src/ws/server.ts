@@ -3,6 +3,8 @@ import type {
   EventHandlerMap,
   RpcToServerHandlerMap,
   RuntimeOptions,
+  RuntimeServer,
+  Transport,
 } from "@kataribe/core";
 import { createServerRuntime } from "@kataribe/core";
 import { CloudflareWebSocketTransport } from "./transport.ts";
@@ -16,6 +18,11 @@ export interface CloudflareWsServerParams<C extends ContractShape> {
   runtime?: RuntimeOptions;
 }
 
+// Store the onTransport callback globally
+let globalOnTransport:
+  | ((transport: CloudflareWebSocketTransport) => void)
+  | undefined;
+
 export function createCloudflareWsHandler<C extends ContractShape>(
   params: CloudflareWsServerParams<C>,
 ): (request: Request) => Response {
@@ -23,7 +30,7 @@ export function createCloudflareWsHandler<C extends ContractShape>(
     (onTransport) => {
       // This function will be called when we create a transport
       // We'll store the callback to use it later
-      (createCloudflareWsHandler as any)._onTransport = onTransport;
+      globalOnTransport = onTransport;
     },
     params.contract,
     params.handlers,
@@ -44,9 +51,8 @@ export function createCloudflareWsHandler<C extends ContractShape>(
     });
 
     // Get the onTransport callback and call it
-    const onTransport = (createCloudflareWsHandler as any)._onTransport;
-    if (onTransport) {
-      onTransport(transport);
+    if (globalOnTransport) {
+      globalOnTransport(transport);
     }
 
     return new Response(null, {
@@ -58,10 +64,11 @@ export function createCloudflareWsHandler<C extends ContractShape>(
 
 // Durable Object class for session management
 export class KataribeDurableObject {
-  private runtime?: any;
-  private state: DurableObjectState;
+  private runtime?: RuntimeServer<ContractShape>;
 
   constructor(state: DurableObjectState) {
+    // State parameter is required by Cloudflare but we may not need to store it
+    // Store it to avoid unused parameter warning
     this.state = state;
   }
 
@@ -87,7 +94,7 @@ export class KataribeDurableObject {
 
   private handleWebSocket(
     request: Request,
-    onTransport: (transport: any) => void,
+    onTransport: (transport: Transport) => void,
   ): Response {
     const upgradeHeader = request.headers.get("Upgrade");
     if (upgradeHeader !== "websocket") {

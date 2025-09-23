@@ -42,8 +42,7 @@ export async function createWsClient<C extends ContractShape>(
       };
 
       transport.onMessage(() => {}); // Initialize
-      (transport as any).opts.onOpen = onOpen;
-      (transport as any).opts.onError = onError;
+      transport.updateCallbacks({ onOpen, onError });
     });
   }
 

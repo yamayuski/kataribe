@@ -19,6 +19,9 @@ export interface BunWsServerParams<C extends ContractShape> {
   hostname?: string;
 }
 
+// Store the onTransport callback globally
+let globalOnTransport: ((transport: BunWebSocketTransport) => void) | undefined;
+
 export async function createBunWsServer<C extends ContractShape>(
   params: BunWsServerParams<C>,
 ): Promise<RuntimeServer<C>> {
@@ -31,7 +34,7 @@ export async function createBunWsServer<C extends ContractShape>(
   const runtime = createServerRuntime(
     (onTransport) => {
       // Store the callback to use it when connections are established
-      (createBunWsServer as any)._onTransport = onTransport;
+      globalOnTransport = onTransport;
     },
     params.contract,
     params.handlers,
@@ -47,9 +50,8 @@ export async function createBunWsServer<C extends ContractShape>(
         connections.set(ws, transport);
 
         // Get the onTransport callback and call it
-        const onTransport = (createBunWsServer as any)._onTransport;
-        if (onTransport) {
-          onTransport(transport);
+        if (globalOnTransport) {
+          globalOnTransport(transport);
         }
       },
       message(ws, message) {
