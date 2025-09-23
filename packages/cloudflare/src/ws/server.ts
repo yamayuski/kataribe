@@ -59,6 +59,7 @@ export function createCloudflareWsHandler<C extends ContractShape>(
 // Durable Object class for session management
 export class KataribeDurableObject {
   private runtime?: any;
+  private state: DurableObjectState;
 
   constructor(state: DurableObjectState) {
     this.state = state;
