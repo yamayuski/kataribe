@@ -1,5 +1,5 @@
 import { createWsServer } from "@kataribe/deno";
-import { contract } from "../contract.ts";
+import { contract } from "@kataribe/examples-shared";
 
 const server = await createWsServer({
   contract,

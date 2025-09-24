@@ -26,6 +26,7 @@ export PATH="$HOME/.deno/bin:$HOME/.bun/bin:$PATH"
 # Verify installations
 echo "✅ Verifying installations..."
 node --version
+npm install -g npm@latest
 npm --version
 
 # Check if Deno is available
@@ -35,7 +36,7 @@ else
     echo "⚠️  Deno installation pending - will be available after shell reload"
 fi
 
-# Check if Bun is available  
+# Check if Bun is available
 if command -v bun &> /dev/null; then
     bun --version
 else

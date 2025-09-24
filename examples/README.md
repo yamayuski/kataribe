@@ -5,6 +5,7 @@ This directory contains examples demonstrating kataribe usage across different r
 ## 🏗️ Setup
 
 1. Generate SSL certificates for secure connections:
+
 ```bash
 # Install mkcert if not already installed
 # See: https://github.com/FiloSottile/mkcert#installation
@@ -14,6 +15,7 @@ mkcert -cert-file certs/localhost.pem -key-file certs/localhost-key.pem localhos
 ```
 
 2. Build the packages:
+
 ```bash
 npm run build
 ```
@@ -21,9 +23,11 @@ npm run build
 ## 📁 Examples Structure
 
 ### Core Examples
+
 - **`contract.ts`** - Shared contract definition used by all examples
 
 ### Runtime-Specific Servers
+
 Each runtime has its own WebSocket server implementation:
 
 | Runtime | Directory | Port | Command |
@@ -34,6 +38,7 @@ Each runtime has its own WebSocket server implementation:
 | Cloudflare | `cloudflare-ws/` | 8787 | `wrangler dev` |
 
 ### Browser Client
+
 - **`browser-client/index.html`** - Universal browser client that can connect to any server
   - Radio button interface to select which runtime to connect to
   - Real-time RPC testing
@@ -43,18 +48,20 @@ Each runtime has its own WebSocket server implementation:
 ## 🚀 Quick Start
 
 1. **Start a server** (pick one):
+
    ```bash
    # Node.js
    npm run dev:server
-   
-   # Deno  
+
+   # Deno
    deno run --allow-net examples/deno-ws/server.ts
-   
+
    # Bun
    bun examples/bun-ws/server.ts
    ```
 
 2. **Test with Node.js client**:
+
    ```bash
    npm run dev:client
    ```
@@ -67,6 +74,7 @@ Each runtime has its own WebSocket server implementation:
 ## 🔧 Development
 
 ### Adding New Transports
+
 Each runtime package supports different transports:
 
 - **Node.js**: WebSocket, WebRTC DataChannel
@@ -76,7 +84,9 @@ Each runtime package supports different transports:
 - **Bun**: WebSocket, WebRTC DataChannel
 
 ### Testing Matrix
+
 Use the browser client to test all runtime combinations:
+
 1. Start multiple servers on different ports
 2. Open browser client
 3. Switch between runtimes using radio buttons
@@ -95,6 +105,7 @@ Use the browser client to test all runtime combinations:
 ## 🔍 Architecture
 
 Each example follows the same pattern:
+
 1. Import the appropriate `@kataribe/{runtime}` package
 2. Use the shared `contract.ts` definition
 3. Implement the same RPC handlers

@@ -1,19 +1,30 @@
 {
   "name": "kataribe-monorepo",
   "version": "0.1.0",
+  "private": true,
   "description": "Bidirectional (client↔server) RPC + events over WebSocket with type-safe unknown-only envelopes.",
   "license": "MIT",
   "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
+  "author": {
+    "email": "m.yamagishi90+git@gmail.com",
+    "name": "Masaru Yamagishi",
+    "url": "https://cafe-capy.net"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yamayuski/kataribe.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yamayuski/kataribe/issues"
+  },
+  "homepage": "https://github.com/yamayuski/kataribe",
   "scripts": {
-    "build": "npm run build --workspaces",
-    "clean": "npm run clean --workspaces",
+    "preinstall": "npx -y only-allow pnpm",
+    "prebuild": "pnpm --recursive --parallel exec rimraf dist",
+    "build": "pnpm --recursive --if-present run \"/^build:.*/\"",
     "format": "biome check --write --unsafe",
     "lint": "biome lint",
     "check": "biome ci",
-    "test": "npm test --workspaces",
     "dev:server": "tsx examples/nodejs-ws/server.ts",
     "dev:client": "tsx examples/nodejs-ws/client.ts",
     "dev:deno": "deno run --allow-net examples/deno-ws/server.ts",
@@ -29,14 +40,20 @@
     "monorepo"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22",
+    "npm": "use pnpm",
+    "pnpm": ">=10.17.1",
+    "yarn": "use pnpm"
   },
+  "packageManager": "pnpm@10.17.1",
   "devDependencies": {
-    "@biomejs/biome": "2.2.4",
-    "@types/node": "^24.5.2",
-    "@types/ws": "^8.18.1",
-    "esbuild": "^0.25.10",
-    "tsx": "^4.20.5",
-    "typescript": "~5.9.2"
+    "@biomejs/biome": "catalog:",
+    "@tsconfig/recommended": "^1.0.10",
+    "@types/node": "catalog:",
+    "@types/ws": "catalog:",
+    "rimraf": "^6.0.1",
+    "tsdown": "^0.15.4",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

@@ -7,6 +7,7 @@ This document provides comprehensive guidance for GitHub Copilot coding agents w
 **kataribe** is a TypeScript library for bidirectional (client ↔ server) RPC + fire-and-forget events over WebSocket with type-safe, `unknown`-only core envelope abstraction (no `any`). It's designed as an npm package library with strict type safety and no `any` types in the source code.
 
 ### Key Features
+
 - Client→Server RPC (`rpcToServer`) and Server→Client RPC (`rpcToClient`) using a single envelope protocol
 - Fire-and-forget events
 - Contract DSL with optional runtime validators
@@ -19,10 +20,10 @@ This document provides comprehensive guidance for GitHub Copilot coding agents w
 
 - **Language**: TypeScript (strict mode, no `any` types)
 - **Runtime**: Node.js >=20
-- **Package Manager**: npm
+- **Package Manager**: pnpm
 - **Build System**: esbuild for bundling, TypeScript compiler for declarations
 - **Code Quality**: Biome for linting, formatting, and CI checks
-- **Dependencies**: 
+- **Dependencies**:
   - `ws` for WebSocket implementation
   - Development tools: `@biomejs/biome`, `esbuild`, `tsx`, `typescript`
 
@@ -81,7 +82,7 @@ The project uses **esbuild** for fast bundling and **TypeScript compiler** for t
 
 ### Build Outputs (dist/)
 - `index.mjs` - ESM bundle
-- `index.cjs` - CommonJS bundle  
+- `index.cjs` - CommonJS bundle
 - `kataribe.umd.js` - UMD bundle for browsers
 - `index.d.ts` + related `.d.ts` files - Type declarations
 
@@ -104,7 +105,7 @@ The project uses **esbuild** for fast bundling and **TypeScript compiler** for t
    ```typescript
    const contract = defineContract({
      rpcToServer: { methodName: rpc<Req, Res>() },
-     rpcToClient: { methodName: rpc<Req, Res>() },  
+     rpcToClient: { methodName: rpc<Req, Res>() },
      events: { eventName: event<Payload>() }
    });
    ```
@@ -133,7 +134,7 @@ The project uses **esbuild** for fast bundling and **TypeScript compiler** for t
 ### Biome Configuration
 The project uses Biome for consistent code style:
 - **Formatting**: Automatic formatting with `npm run format`
-- **Linting**: Static analysis with `npm run lint` 
+- **Linting**: Static analysis with `npm run lint`
 - **CI checks**: Combined checks with `npm run check`
 
 ### TypeScript Conventions
@@ -153,7 +154,7 @@ The project uses Biome for consistent code style:
 The `examples/` directory contains working implementations:
 - **Contract definition** (`contract.ts`) - Shows contract DSL usage
 - **Server implementation** (`node-server.ts`) - WebSocket server with RPC handlers
-- **Node client** (`node-client.ts`) - Node.js client implementation  
+- **Node client** (`node-client.ts`) - Node.js client implementation
 - **Browser client** (`browser-client.ts`) - Browser-compatible client
 
 ### Manual Testing
@@ -161,7 +162,7 @@ The `examples/` directory contains working implementations:
 # Terminal 1: Start server
 npm run dev:server
 
-# Terminal 2: Run client  
+# Terminal 2: Run client
 npm run dev:client
 ```
 
@@ -181,7 +182,7 @@ When working on this repository, always use the provided npm scripts:
 
 ## CI/CD
 
-**GitHub Actions**: 
+**GitHub Actions**:
 - Node.js 24 testing
 - Biome CI checks (`npm run check`)
 - Build verification (`npm run build`)

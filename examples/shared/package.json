@@ -1,0 +1,17 @@
+{
+  "name": "@kataribe/examples-shared",
+  "version": "0.1.0",
+  "description": "Shared types and utilities for kataribe examples",
+  "private": true,
+  "main": "contract.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./contract.ts",
+      "types": "./contract.ts"
+    }
+  },
+  "dependencies": {
+    "@kataribe/core": "workspace:*"
+  }
+}

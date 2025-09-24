@@ -1,5 +1,5 @@
 import { createBunWsServer } from "@kataribe/bun";
-import { contract } from "../contract.ts";
+import { contract } from "@kataribe/examples-shared";
 
 const server = await createBunWsServer({
   contract,

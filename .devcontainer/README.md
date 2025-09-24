@@ -5,16 +5,19 @@ This directory contains the DevContainer configuration for the Kataribe TypeScri
 ## What's Included
 
 ### Runtime Environments
-- **Node.js 20** (primary runtime, as specified in package.json engines)
+
+- **Node.js 24** (primary runtime, as specified in package.json engines)
 - **Deno** (additional JavaScript/TypeScript runtime)
 - **Bun** (fast JavaScript runtime and package manager)
 
 ### VS Code Extensions
+
 - **Biome** (`biomejs.biome`) - Code formatting and linting
 - **TypeScript** (`ms-vscode.vscode-typescript-next`) - Enhanced TypeScript support
 - **JSON** (`ms-vscode.vscode-json`) - JSON language support
 
 ### Port Forwarding
+
 - **Port 3000** - WebSocket server (from examples)
 - **Port 8080** - Development server
 
@@ -60,7 +63,7 @@ node --version
 # Deno
 deno --version
 
-# Bun  
+# Bun
 bun --version
 ```
 

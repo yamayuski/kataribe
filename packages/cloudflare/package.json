@@ -20,13 +20,7 @@
   ],
   "scripts": {
     "clean": "npx rimraf dist",
-    "build:types": "tsc --emitDeclarationOnly",
-    "build:esm": "esbuild src/index.ts --bundle --format=esm --platform=neutral --sourcemap --outfile=dist/index.mjs",
-    "build:cjs": "esbuild src/index.ts --bundle --format=cjs --platform=neutral --sourcemap --outfile=dist/index.cjs",
-    "build": "npm run clean && npm run build:types && npm run build:esm && npm run build:cjs",
-    "format": "biome check --write --unsafe",
-    "lint": "biome lint",
-    "check": "biome ci"
+    "build:types": "npx wrangler types && tsc --emitDeclarationOnly"
   },
   "keywords": [
     "rpc",
@@ -36,17 +30,12 @@
     "typescript"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "dependencies": {
-    "@kataribe/core": "^0.1.0"
+    "@kataribe/core": "workspace:*"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.4",
-    "@cloudflare/workers-types": "^4.20241218.0",
-    "@types/node": "^24.5.2",
-    "esbuild": "^0.25.10",
-    "typescript": "~5.9.2",
-    "wrangler": "^3.101.0"
+    "wrangler": "^4.39.0"
   }
 }

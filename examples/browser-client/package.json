@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "dependencies": {
+    "@kataribe/browser": "workspace:*",
+    "@kataribe/examples-shared": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^7.1.7"
+  }
+}

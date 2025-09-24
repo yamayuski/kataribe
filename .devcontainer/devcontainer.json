@@ -1,20 +1,25 @@
 {
   "name": "Kataribe TypeScript Development",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-24",
 
   "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "nodeGypDependencies": true,
-      "version": "20"
+    "ghcr.io/devcontainers/features/common-utils": {
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true,
+      "installZsh": true,
+      "upgradePackages": true,
+      "username": "node",
+      "userUid": 1000,
+      "userGid": 1000
     }
   },
 
   "customizations": {
     "vscode": {
       "extensions": [
+        "-esbenp.prettier-vscode",
+        "-eslint.vscode-eslint",
         "biomejs.biome",
-        "ms-vscode.vscode-typescript-next",
-        "bradlc.vscode-tailwindcss",
         "ms-vscode.vscode-json"
       ],
       "settings": {

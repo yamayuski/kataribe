@@ -1,6 +1,6 @@
-# kataribe
+# Kataribe
 
-Bidirectional (client ↔ server) RPC + fire-and-forget events over WebSocket with a type-safe, `unknown`-only core envelope abstraction (no `any`).
+Kataribe is transport-and-runtime-agnostic TypeScript packages for bidirectional (client ↔ server) RPC + fire-and-forget events over WebSocket with a type-safe, `unknown`-only core envelope abstraction (no `any`).
 
 ## Features
 
@@ -9,12 +9,19 @@ Bidirectional (client ↔ server) RPC + fire-and-forget events over WebSocket wi
 - Contract DSL with optional runtime validators.
 - Middleware (in/out) for auth, tracing, compression hooks.
 - No `any` in source; strict generics.
-- WebSocket transport (browser + Node `ws`).
-- **WebRTC DataChannel transport for browser P2P communication**.
-- Bundled outputs: ESM, CJS, UMD + type declarations.
 - Biome for lint/format/ci.
 
-## Install (after publish)
+### Supported Runtimes and Transports
+
+|Runtime|WebSocket|WebRTC|WebTransport|
+|---|---|---|---|
+|node.js 22+|✅|✅|✖|
+|Deno 2.5+|✅|✅|✅(unstable)|
+|Cloudflare Workers|✅|✅|✖|
+|Bun|✅|✅|✖|
+|Browsers|✅|✅|✅(experimental)|
+
+## WIP: Install (after publish)
 
 ```bash
 npm install kataribe
@@ -71,26 +78,7 @@ console.log(sum);
 | dev:client | Run example node client |
 | dev:webrtc-signaling | Run WebRTC signaling server |
 
-## Build Outputs
-
-```
-dist/
-  index.mjs
-  index.cjs
-  kataribe.umd.js
-  index.d.ts (and related .d.ts files)
-```
-
 ## Runtime Support
-
-### Server Runtimes
-
-|Runtime|WebSocket|WebRTC|WebTransport|
-|---|---|---|---|
-|node.js|✅|✅|✖|
-|Deno|✅|✅|✅(unstable)|
-|Cloudflare|✅|✅|✖|
-|Bun|✅|✅|✖|
 
 ### Browsers
 
@@ -118,8 +106,8 @@ Example servers will use these certificates for secure communication.
 
 The repository includes a DevContainer configuration for a consistent development environment:
 
-- **Node.js 20** (primary runtime)
-- **Deno** and **Bun** (additional JavaScript runtimes)  
+- **Node.js 22+** (primary runtime)
+- **Deno** and **Bun** (additional JavaScript runtimes)
 - **Biome** VS Code extension for formatting and linting
 - **Pre-configured** VS Code settings and port forwarding
 

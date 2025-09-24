@@ -1,5 +1,5 @@
+import { contract } from "@kataribe/examples-shared";
 import { createWsClient } from "@kataribe/nodejs";
-import { contract } from "../contract.ts";
 
 const client = await createWsClient({
   url: "ws://localhost:3000",
