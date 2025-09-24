@@ -1,10 +1,12 @@
 {
+  "name": "@kataribe/examples-browser-client",
+  "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@kataribe/browser": "workspace:*",
     "@kataribe/examples-shared": "workspace:*"
   },
   "devDependencies": {
-    "vite": "^7.1.7"
+    "vite": "^7.1.0"
   }
 }

@@ -48,11 +48,12 @@
   "packageManager": "pnpm@10.17.1",
   "devDependencies": {
     "@biomejs/biome": "catalog:",
+    "@changesets/cli": "^2.29.7",
     "@tsconfig/recommended": "^1.0.10",
     "@types/node": "catalog:",
     "@types/ws": "catalog:",
     "rimraf": "^6.0.1",
-    "tsdown": "^0.15.4",
+    "tsdown": "^0.15.2",
     "tsx": "catalog:",
     "typescript": "catalog:"
   }

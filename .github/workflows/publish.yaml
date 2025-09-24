@@ -1,0 +1,30 @@
+name: Publish Package to npmjs
+on:
+  release:
+    types: [published]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: denoland/setup-deno@v2
+      - uses: oven-sh/setup-bun@v2
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: "pnpm"
+      - name: Install deps
+        run: pnpm install
+      - name: Biome CI
+        run: pnpm run check
+      - name: Build
+        run: pnpm run build
+      - run: pnpm publish --recursive
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
