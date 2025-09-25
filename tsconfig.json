@@ -1,4 +1,5 @@
 {
+  "extends": "@tsconfig/recommended/tsconfig.json",
   "compilerOptions": {
     "target": "ES2022",
     "module": "nodenext",
@@ -14,12 +15,6 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true
   },
-  "include": [
-    "src/**/*.mts",
-    "src/index.ts",
-    "src/runtime.ts",
-    "src/types.ts",
-    "src/utils.ts"
-  ],
-  "exclude": ["dist", "examples", "node_modules"]
+  "include": ["packages"],
+  "exclude": ["dist", "node_modules"]
 }

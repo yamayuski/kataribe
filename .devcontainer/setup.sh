@@ -8,7 +8,8 @@ echo "🚀 Setting up Kataribe development environment..."
 
 # Install dependencies
 echo "📦 Installing npm dependencies..."
-npm install
+corepack enable
+pnpm install
 
 # Install Deno
 echo "🦕 Installing Deno..."
@@ -26,6 +27,7 @@ export PATH="$HOME/.deno/bin:$HOME/.bun/bin:$PATH"
 # Verify installations
 echo "✅ Verifying installations..."
 node --version
+npm install -g npm@latest
 npm --version
 
 # Check if Deno is available
@@ -35,7 +37,7 @@ else
     echo "⚠️  Deno installation pending - will be available after shell reload"
 fi
 
-# Check if Bun is available  
+# Check if Bun is available
 if command -v bun &> /dev/null; then
     bun --version
 else
@@ -44,10 +46,10 @@ fi
 
 # Run initial checks
 echo "🔍 Running code quality checks..."
-npm run check
+pnpm run check
 
 echo "🏗️  Running initial build..."
-npm run build
+pnpm run build
 
 echo "✅ DevContainer setup complete!"
 echo ""

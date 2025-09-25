@@ -1,0 +1,49 @@
+{
+  "name": "@kataribe/cloudflare",
+  "version": "0.1.0",
+  "description": "Cloudflare Workers implementation for kataribe - WebSocket with Durable Objects",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yamayuski/kataribe.git"
+  },
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "npx wrangler types src/worker-configuration.d.ts && tsc --emitDeclarationOnly"
+  },
+  "keywords": [
+    "rpc",
+    "websocket",
+    "cloudflare",
+    "workers",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@kataribe/core": "workspace:*"
+  },
+  "devDependencies": {
+    "wrangler": "^4.37.0"
+  }
+}

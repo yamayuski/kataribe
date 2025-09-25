@@ -1,0 +1,10 @@
+{
+  "name": "@kataribe/examples-bun-ws-server",
+  "private": true,
+  "type": "module",
+  "main": "server.ts",
+  "dependencies": {
+    "@kataribe/bun": "workspace:*",
+    "@kataribe/examples-shared": "workspace:*"
+  }
+}

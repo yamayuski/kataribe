@@ -1,0 +1,49 @@
+{
+  "name": "@kataribe/deno",
+  "version": "0.1.0",
+  "description": "Deno implementation for kataribe - WebSocket, WebRTC, WebTransport",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yamayuski/kataribe.git"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "npx rimraf dist",
+    "build": "deno bundle --outdir dist --minify --sourcemap src/index.ts && tsc --emitDeclarationOnly"
+  },
+  "keywords": [
+    "rpc",
+    "websocket",
+    "webrtc",
+    "webtransport",
+    "deno",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@kataribe/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@tsconfig/deno": "^1.0.11"
+  }
+}

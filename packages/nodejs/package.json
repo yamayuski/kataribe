@@ -1,0 +1,50 @@
+{
+  "name": "@kataribe/nodejs",
+  "version": "0.1.0",
+  "description": "Node.js implementation for kataribe - WebSocket, WebRTC",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yamayuski/kataribe.git"
+  },
+  "sideEffects": false,
+  "main": "dist/index.cjs",
+  "types": "dist/index.d.cts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.cts",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown"
+  },
+  "keywords": [
+    "rpc",
+    "websocket",
+    "webrtc",
+    "nodejs",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@kataribe/core": "workspace:*",
+    "isomorphic-ws": "^5.0.0",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@tsconfig/node24": "^24.0.1",
+    "@types/node": "catalog:",
+    "@types/ws": "catalog:"
+  }
+}

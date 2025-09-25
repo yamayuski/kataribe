@@ -1,0 +1,11 @@
+{
+  "extends": ["../../tsconfig.json", "@tsconfig/deno/tsconfig.json"],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationDir": "./dist",
+    "lib": ["dom", "es2022"]
+  },
+  "include": ["src/**/*"],
+  "types": ["@types/node"]
+}

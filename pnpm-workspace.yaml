@@ -1,0 +1,18 @@
+packages:
+  - examples/*
+  - packages/*
+
+catalog:
+  '@biomejs/biome': 2.2.4
+  '@types/node': 24.5.0
+  '@types/ws': 8.18.1
+  esbuild: 0.25.10
+  tsx: 4.20.5
+  typescript: 5.9.2
+
+minimumReleaseAge: 10080
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - workerd

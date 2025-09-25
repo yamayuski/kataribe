@@ -1,37 +1,37 @@
 {
-  "name": "kataribe",
+  "name": "kataribe-monorepo",
   "version": "0.1.0",
+  "private": true,
   "description": "Bidirectional (client↔server) RPC + events over WebSocket with type-safe unknown-only envelopes.",
   "license": "MIT",
   "type": "module",
-  "sideEffects": false,
-  "main": "dist/index.cjs",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.mjs",
-      "types": "./dist/index.d.ts"
-    }
+  "author": {
+    "email": "m.yamagishi90+git@gmail.com",
+    "name": "Masaru Yamagishi",
+    "url": "https://cafe-capy.net"
   },
-  "files": [
-    "dist"
-  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yamayuski/kataribe.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yamayuski/kataribe/issues"
+  },
+  "homepage": "https://github.com/yamayuski/kataribe",
   "scripts": {
-    "clean": "npx rimraf dist",
-    "build:types": "tsc --emitDeclarationOnly",
-    "build:esm": "esbuild src/index.ts --bundle --format=esm --platform=neutral --sourcemap --outfile=dist/index.mjs --external:ws --external:isomorphic-ws",
-    "build:cjs": "esbuild src/index.ts --bundle --format=cjs --platform=node --sourcemap --outfile=dist/index.cjs",
-    "build:umd": "esbuild src/index.ts --bundle --format=iife --global-name=Kataribe --platform=browser --sourcemap --outfile=dist/kataribe.umd.js --external:ws --external:isomorphic-ws",
-    "build": "npm run clean && npm run build:types && npm run build:esm && npm run build:cjs && npm run build:umd",
+    "preinstall": "npx -y only-allow pnpm",
+    "prebuild": "pnpm --recursive --parallel exec rimraf dist",
+    "build": "pnpm --filter \"@kataribe/core\" run build && pnpm --recursive --parallel --if-present --filter=!@kataribe/core run build",
+    "prepublishOnly": "pnpm run build",
+    "publish:npm": "pnpm --recursive --filter \"@kataribe/{core,browser,deno,nodejs,bun,cloudflare}\" publish --access public",
+    "publish:jsr": "pnpm --recursive --filter \"@kataribe/{core,browser,deno}\" exec jsr publish",
     "format": "biome check --write --unsafe",
     "lint": "biome lint",
     "check": "biome ci",
-    "dev:server": "tsx examples/node-server.ts",
-    "dev:client": "tsx examples/node-client.ts",
-    "dev:webrtc-signaling": "tsx examples/webrtc-signaling-server.ts"
+    "dev:server": "tsx examples/nodejs-ws/server.ts",
+    "dev:client": "tsx examples/nodejs-ws/client.ts",
+    "dev:deno": "deno run --allow-net examples/deno-ws/server.ts",
+    "dev:bun": "bun examples/bun-ws/server.ts"
   },
   "keywords": [
     "rpc",
@@ -39,21 +39,25 @@
     "typescript",
     "bidirectional",
     "events",
-    "envelope"
+    "envelope",
+    "monorepo"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22",
+    "npm": "use pnpm",
+    "pnpm": ">=10.17.1",
+    "yarn": "use pnpm"
   },
+  "packageManager": "pnpm@10.17.1",
   "devDependencies": {
-    "@biomejs/biome": "2.2.4",
-    "@types/node": "^24.5.2",
-    "@types/ws": "^8.18.1",
-    "esbuild": "^0.25.10",
-    "tsx": "^4.20.5",
-    "typescript": "~5.9.2"
-  },
-  "dependencies": {
-    "isomorphic-ws": "^5.0.0",
-    "ws": "^8.18.3"
+    "@biomejs/biome": "catalog:",
+    "@changesets/cli": "^2.29.7",
+    "@tsconfig/recommended": "^1.0.10",
+    "@types/node": "catalog:",
+    "@types/ws": "catalog:",
+    "rimraf": "^6.0.1",
+    "tsdown": "^0.15.2",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

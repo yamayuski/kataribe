@@ -1,0 +1,10 @@
+{
+  "name": "@kataribe/examples-deno-ws-server",
+  "private": true,
+  "type": "module",
+  "main": "server.ts",
+  "dependencies": {
+    "@kataribe/deno": "workspace:*",
+    "@kataribe/examples-shared": "workspace:*"
+  }
+}

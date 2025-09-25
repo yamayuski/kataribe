@@ -1,0 +1,10 @@
+{
+  "extends": ["../../tsconfig.json", "@tsconfig/bun/tsconfig.json"],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationDir": "./dist",
+    "lib": ["es2022", "dom"]
+  },
+  "include": ["src/**/*"]
+}

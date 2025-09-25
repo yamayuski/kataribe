@@ -1,0 +1,53 @@
+{
+  "name": "@kataribe/bun",
+  "version": "0.1.0",
+  "description": "Bun implementation for kataribe - WebSocket, WebRTC",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yamayuski/kataribe.git"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "bun": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "npx rimraf dist",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:bun": "bun build ./src/index.ts --outdir ./dist --target=bun --splitting --minify --sourcemap",
+    "build": "npm run clean && npm run build:bun && npm run build:types"
+  },
+  "keywords": [
+    "rpc",
+    "websocket",
+    "webrtc",
+    "bun",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@kataribe/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@tsconfig/bun": "^1.0.8",
+    "@types/bun": "latest"
+  }
+}

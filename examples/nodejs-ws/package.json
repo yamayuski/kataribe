@@ -1,0 +1,10 @@
+{
+  "name": "@kataribe/examples-nodejs-ws-server",
+  "private": true,
+  "type": "module",
+  "main": "server.ts",
+  "dependencies": {
+    "@kataribe/examples-shared": "workspace:*",
+    "@kataribe/nodejs": "workspace:*"
+  }
+}

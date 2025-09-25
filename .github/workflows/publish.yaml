@@ -1,11 +1,13 @@
-name: "Continuous Integration"
-
+name: Publish Package to npmjs
 on:
-  push:
-
+  release:
+    types: [published]
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v5
       - uses: denoland/setup-deno@v2
@@ -23,3 +25,7 @@ jobs:
         run: pnpm run check
       - name: Build
         run: pnpm run build
+      - run: pnpm publish:npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: pnpm publish:jsr
