@@ -10,6 +10,5 @@ export default defineConfig([
     format: ["commonjs"],
     minify: true,
     sourcemap: true,
-    target: "node",
   },
 ]);

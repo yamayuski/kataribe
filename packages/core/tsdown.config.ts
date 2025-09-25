@@ -10,7 +10,6 @@ export default defineConfig([
     format: ["commonjs"],
     minify: true,
     sourcemap: true,
-    target: "node",
   },
   {
     entry: "./src/index.ts",
@@ -21,6 +20,5 @@ export default defineConfig([
     format: ["esm"],
     minify: true,
     sourcemap: true,
-    target: "es2020",
   },
 ]);

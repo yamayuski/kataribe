@@ -13,14 +13,13 @@
     "type": "git",
     "url": "https://github.com/yamayuski/kataribe.git"
   },
-  "main": "dist/index.cjs",
-  "module": "dist/index.mjs",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.js"
     }
   },
   "files": [
@@ -28,7 +27,7 @@
   ],
   "scripts": {
     "clean": "npx rimraf dist",
-    "build": "deno bundle --outdir dist --minify --sourcemap src/index.ts"
+    "build": "deno bundle --outdir dist --minify --sourcemap src/index.ts && tsc --emitDeclarationOnly"
   },
   "keywords": [
     "rpc",

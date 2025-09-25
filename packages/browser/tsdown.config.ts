@@ -6,7 +6,7 @@ export default defineConfig([
     platform: "browser",
     outDir: "dist",
     clean: false,
-    dts: false,
+    dts: true,
     format: ["esm"],
     minify: true,
     sourcemap: true,

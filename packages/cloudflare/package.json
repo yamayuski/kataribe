@@ -13,22 +13,22 @@
     "type": "git",
     "url": "https://github.com/yamayuski/kataribe.git"
   },
-  "main": "dist/index.cjs",
-  "module": "dist/index.mjs",
+  "main": "src/index.ts",
+  "module": "src/index.ts",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
-    "clean": "npx rimraf dist",
-    "build:types": "npx wrangler types && tsc --emitDeclarationOnly"
+    "build": "npx wrangler types src/worker-configuration.d.ts && tsc --emitDeclarationOnly"
   },
   "keywords": [
     "rpc",

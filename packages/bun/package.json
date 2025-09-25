@@ -13,14 +13,15 @@
     "type": "git",
     "url": "https://github.com/yamayuski/kataribe.git"
   },
-  "main": "dist/index.cjs",
-  "module": "dist/index.mjs",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "bun": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -30,7 +31,7 @@
     "clean": "npx rimraf dist",
     "build:types": "tsc --emitDeclarationOnly",
     "build:bun": "bun build ./src/index.ts --outdir ./dist --target=bun --splitting --minify --sourcemap",
-    "build": "npm run clean && npm run build:types && npm run build:bun"
+    "build": "npm run clean && npm run build:bun && npm run build:types"
   },
   "keywords": [
     "rpc",

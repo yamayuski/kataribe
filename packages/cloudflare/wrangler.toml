@@ -1,4 +1,4 @@
-name = "@kataribe/cloudflare"
+name = "kataribe"
 main = "dist/index.mjs"
 compatibility_date = "2025-09-15"
 

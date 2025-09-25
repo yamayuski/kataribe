@@ -8,7 +8,8 @@ echo "🚀 Setting up Kataribe development environment..."
 
 # Install dependencies
 echo "📦 Installing npm dependencies..."
-npm install
+corepack enable
+pnpm install
 
 # Install Deno
 echo "🦕 Installing Deno..."
@@ -45,10 +46,10 @@ fi
 
 # Run initial checks
 echo "🔍 Running code quality checks..."
-npm run check
+pnpm run check
 
 echo "🏗️  Running initial build..."
-npm run build
+pnpm run build
 
 echo "✅ DevContainer setup complete!"
 echo ""

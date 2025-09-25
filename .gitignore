@@ -3,3 +3,5 @@ dist/
 .DS_Store
 *Zone.Identifier
 *.log*
+.pnpm-store/
+packages/cloudflare/src/worker-configuration.d.ts
