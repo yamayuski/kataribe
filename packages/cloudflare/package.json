@@ -28,7 +28,8 @@
     "src"
   ],
   "scripts": {
-    "build": "npx wrangler types src/worker-configuration.d.ts && tsc --emitDeclarationOnly"
+    "build": "npx wrangler types src/worker-configuration.d.ts && tsc --emitDeclarationOnly",
+    "test": "vitest"
   },
   "keywords": [
     "rpc",
@@ -44,6 +45,7 @@
     "@kataribe/core": "workspace:*"
   },
   "devDependencies": {
-    "wrangler": "^4.37.0"
+    "wrangler": "^4.37.0",
+    "vitest": "catalog:"
   }
 }
