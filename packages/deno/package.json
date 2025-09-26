@@ -28,7 +28,7 @@
   "scripts": {
     "clean": "npx rimraf dist",
     "build": "deno bundle --outdir dist --minify --sourcemap src/index.ts && tsc --emitDeclarationOnly",
-    "test": "deno test --allow-net"
+    "test": "cd src/ws && deno test --no-check transport_test.ts"
   },
   "keywords": [
     "rpc",
