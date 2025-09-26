@@ -31,7 +31,8 @@
     "clean": "npx rimraf dist",
     "build:types": "tsc --emitDeclarationOnly",
     "build:bun": "bun build ./src/index.ts --outdir ./dist --target=bun --splitting --minify --sourcemap",
-    "build": "npm run clean && npm run build:bun && npm run build:types"
+    "build": "npm run clean && npm run build:bun && npm run build:types",
+    "test": "bun test"
   },
   "keywords": [
     "rpc",
