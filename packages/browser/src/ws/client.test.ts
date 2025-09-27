@@ -1,5 +1,5 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
 import { defineContract, event, rpc } from "@kataribe/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createWsClient } from "./client.ts";
 
 // Mock WebSocket for testing (same as transport test)
@@ -8,7 +8,10 @@ class MockWebSocket {
   private eventListeners: Record<string, Function[]> = {};
   public sentData: unknown[] = [];
 
-  constructor(public url: string, public protocols?: string | string[]) {
+  constructor(
+    public url: string,
+    public protocols?: string | string[],
+  ) {
     this.readyState = WebSocket.CONNECTING;
     setTimeout(() => {
       this.readyState = WebSocket.OPEN;
@@ -52,7 +55,7 @@ class MockWebSocket {
 
 // Mock the global WebSocket
 beforeEach(() => {
-  // @ts-ignore
+  // @ts-expect-error
   global.WebSocket = MockWebSocket;
   global.WebSocket.CONNECTING = 0;
   global.WebSocket.OPEN = 1;
@@ -101,7 +104,7 @@ describe("createWsClient", () => {
   it("should handle connection callbacks", async () => {
     const onOpen = vi.fn();
     const onClose = vi.fn();
-    
+
     const client = await createWsClient({
       url: "ws://localhost:8080",
       contract: testContract,
@@ -115,7 +118,7 @@ describe("createWsClient", () => {
 
   it("should handle server RPC handlers", async () => {
     const notifyHandler = vi.fn().mockResolvedValue(undefined);
-    
+
     const client = await createWsClient({
       url: "ws://localhost:8080",
       contract: testContract,

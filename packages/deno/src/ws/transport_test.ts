@@ -5,17 +5,25 @@ function assertEquals(actual: unknown, expected: unknown, msg?: string): void {
   }
 }
 
-function assertThrows(fn: () => void, ErrorClass?: ErrorConstructor, msgIncludes?: string): void {
+function assertThrows(
+  fn: () => void,
+  ErrorClass?: ErrorConstructor,
+  msgIncludes?: string,
+): void {
   let didThrow = false;
   try {
     fn();
   } catch (error) {
     didThrow = true;
     if (ErrorClass && !(error instanceof ErrorClass)) {
-      throw new Error(`Expected ${ErrorClass.name}, got ${error.constructor.name}`);
+      throw new Error(
+        `Expected ${ErrorClass.name}, got ${error.constructor.name}`,
+      );
     }
     if (msgIncludes && !error.message.includes(msgIncludes)) {
-      throw new Error(`Expected error message to include "${msgIncludes}", got "${error.message}"`);
+      throw new Error(
+        `Expected error message to include "${msgIncludes}", got "${error.message}"`,
+      );
     }
   }
   if (!didThrow) {
@@ -31,7 +39,10 @@ class MockWebSocket {
   private eventListeners: Record<string, Function[]> = {};
   public sentData: unknown[] = [];
 
-  constructor(public url: string, public protocols?: string | string[]) {
+  constructor(
+    public url: string,
+    public protocols?: string | string[],
+  ) {
     // Start as OPEN for simplicity in tests
     this.readyState = 1; // OPEN
   }
@@ -77,7 +88,7 @@ globalThis.WebSocket = {
 } as any;
 
 // Override WebSocket constructor for testing
-// @ts-ignore
+// @ts-expect-error
 globalThis.WebSocket = MockWebSocket as any;
 globalThis.WebSocket.CONNECTING = 0;
 globalThis.WebSocket.OPEN = 1;
@@ -93,7 +104,7 @@ Deno.test("WebSocketTransport - should throw error when neither url nor existing
   assertThrows(
     () => new WebSocketTransport({}),
     Error,
-    "Either 'url' or 'existing' WebSocket must be provided"
+    "Either 'url' or 'existing' WebSocket must be provided",
   );
 });
 
@@ -105,20 +116,20 @@ Deno.test("WebSocketTransport - should use existing WebSocket when provided", ()
 
 Deno.test("WebSocketTransport - should send data when WebSocket is open", () => {
   const transport = new WebSocketTransport({ url: "ws://localhost:8080" });
-  
+
   const testData = { message: "hello" };
   transport.send(testData);
-  
+
   const socket = (transport as any).socket as MockWebSocket;
   assertEquals(socket.sentData.includes(JSON.stringify(testData)), true);
 });
 
 Deno.test("WebSocketTransport - should send string data as-is", () => {
   const transport = new WebSocketTransport({ url: "ws://localhost:8080" });
-  
+
   const testData = "hello world";
   transport.send(testData);
-  
+
   const socket = (transport as any).socket as MockWebSocket;
   assertEquals(socket.sentData.includes(testData), true);
 });
@@ -126,22 +137,24 @@ Deno.test("WebSocketTransport - should send string data as-is", () => {
 Deno.test("WebSocketTransport - should register message listeners", () => {
   const transport = new WebSocketTransport({ url: "ws://localhost:8080" });
   let messageReceived: unknown = null;
-  const messageListener = (data: unknown) => { messageReceived = data; };
-  
+  const messageListener = (data: unknown) => {
+    messageReceived = data;
+  };
+
   transport.onMessage(messageListener);
-  
+
   const socket = (transport as any).socket as MockWebSocket;
   const testMessage = "test message";
   socket.simulateMessage(testMessage);
-  
+
   assertEquals(messageReceived, testMessage);
 });
 
 Deno.test("WebSocketTransport - should report correct open state", () => {
   const transport = new WebSocketTransport({ url: "ws://localhost:8080" });
-  
+
   assertEquals(transport.isOpen(), true);
-  
+
   transport.close();
   assertEquals(transport.isOpen(), false);
 });

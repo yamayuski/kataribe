@@ -1,4 +1,6 @@
+import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { MockTransport } from "../../internal/src/mockTransport.ts";
 import {
   createClientRuntime,
   createServerConnection,
@@ -6,50 +8,6 @@ import {
 } from "./runtime.ts";
 import type { Envelope, RuntimeOptions, Transport } from "./types.ts";
 import { defineContract, event, rpc } from "./types.ts";
-
-// Mock transport implementation for testing
-class MockTransport implements Transport {
-  private messageHandlers: ((data: unknown) => void)[] = [];
-  private sentMessages: unknown[] = [];
-  private _isOpen = true;
-
-  send(data: unknown): void {
-    this.sentMessages.push(data);
-  }
-
-  onMessage(cb: (data: unknown) => void): () => void {
-    this.messageHandlers.push(cb);
-    return () => {
-      const index = this.messageHandlers.indexOf(cb);
-      if (index > -1) {
-        this.messageHandlers.splice(index, 1);
-      }
-    };
-  }
-
-  close(): void {
-    this._isOpen = false;
-  }
-
-  isOpen(): boolean {
-    return this._isOpen;
-  }
-
-  // Test helpers
-  simulateMessage(data: unknown): void {
-    for (const handler of this.messageHandlers) {
-      handler(data);
-    }
-  }
-
-  getSentMessages(): unknown[] {
-    return [...this.sentMessages];
-  }
-
-  clearSentMessages(): void {
-    this.sentMessages = [];
-  }
-}
 
 // Test contract
 const testContract = defineContract({
@@ -63,6 +21,86 @@ const testContract = defineContract({
   events: {
     userJoined: event<{ userId: string; name: string }>(),
     message: event<{ text: string }>(),
+  },
+});
+
+const flushMicrotasks = () =>
+  new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+const standardSchemaVendor = "test-schemas" as const;
+
+const addRequestSchema = {
+  "~standard": {
+    version: 1,
+    vendor: standardSchemaVendor,
+    validate(value: unknown) {
+      if (typeof value !== "object" || value === null) {
+        return { issues: [{ message: "Expected object" }] };
+      }
+      const { a, b } = value as { a?: unknown; b?: unknown };
+      if (typeof a !== "number" || typeof b !== "number") {
+        return { issues: [{ message: "a and b must be numbers" }] };
+      }
+      return { value: { a, b } };
+    },
+  },
+} satisfies StandardSchemaV1<unknown, { a: number; b: number }>;
+
+const addResponseSchema = {
+  "~standard": {
+    version: 1,
+    vendor: standardSchemaVendor,
+    validate(value: unknown) {
+      if (typeof value !== "object" || value === null) {
+        return { issues: [{ message: "Expected object" }] };
+      }
+      const { sum } = value as { sum?: unknown };
+      if (typeof sum === "number" && Number.isFinite(sum)) {
+        return { value: { sum } };
+      }
+      if (
+        typeof sum === "string" &&
+        sum.trim() !== "" &&
+        !Number.isNaN(Number(sum))
+      ) {
+        return { value: { sum: Number(sum) } };
+      }
+      return { issues: [{ message: "sum must be number" }] };
+    },
+  },
+} satisfies StandardSchemaV1<unknown, { sum: number }>;
+
+const userJoinedSchema = {
+  "~standard": {
+    version: 1,
+    vendor: standardSchemaVendor,
+    validate(value: unknown) {
+      if (typeof value !== "object" || value === null) {
+        return { issues: [{ message: "Expected object" }] };
+      }
+      const { userId, name } = value as { userId?: unknown; name?: unknown };
+      if (typeof userId !== "string" || userId.trim() === "") {
+        return { issues: [{ message: "userId must be a non-empty string" }] };
+      }
+      if (typeof name !== "string" || name.trim() === "") {
+        return { issues: [{ message: "name must be a non-empty string" }] };
+      }
+      return { value: { userId, name: name.trim() } };
+    },
+  },
+} satisfies StandardSchemaV1<unknown, { userId: string; name: string }>;
+
+const standardSchemaContract = defineContract({
+  rpcToServer: {
+    add: rpc<{ a: number; b: number }, { sum: number }>({
+      schemaReq: addRequestSchema,
+      schemaRes: addResponseSchema,
+    }),
+  },
+  events: {
+    userJoined: event<{ userId: string; name: string }>({
+      schema: userJoinedSchema,
+    }),
   },
 });
 
@@ -94,7 +132,7 @@ describe("runtime", () => {
       const client = createClientRuntime(
         mockTransport,
         testContract,
-        {},
+        undefined,
         mockOptions,
       );
 
@@ -107,7 +145,7 @@ describe("runtime", () => {
     });
 
     it("should send hello message on creation", () => {
-      createClientRuntime(mockTransport, testContract, {}, mockOptions);
+      createClientRuntime(mockTransport, testContract, undefined, mockOptions);
 
       const sentMessages = mockTransport.getSentMessages();
       expect(sentMessages).toHaveLength(1);
@@ -122,7 +160,7 @@ describe("runtime", () => {
       const client = createClientRuntime(
         mockTransport,
         testContract,
-        {},
+        undefined,
         mockOptions,
       );
       mockTransport.clearSentMessages();
@@ -161,7 +199,7 @@ describe("runtime", () => {
       const client = createClientRuntime(
         mockTransport,
         testContract,
-        {},
+        undefined,
         mockOptions,
       );
       mockTransport.clearSentMessages();
@@ -185,7 +223,7 @@ describe("runtime", () => {
       const client = createClientRuntime(
         mockTransport,
         testContract,
-        {},
+        undefined,
         mockOptions,
       );
       mockTransport.clearSentMessages();
@@ -208,7 +246,7 @@ describe("runtime", () => {
       const client = createClientRuntime(
         mockTransport,
         testContract,
-        {},
+        undefined,
         mockOptions,
       );
       const eventHandler = vi.fn();
@@ -285,7 +323,7 @@ describe("runtime", () => {
       const client = createClientRuntime(
         mockTransport,
         testContract,
-        {},
+        undefined,
         mockOptions,
       );
 
@@ -343,6 +381,9 @@ describe("runtime", () => {
       const handlers = {
         rpcToServer: {
           add: vi.fn().mockResolvedValue(8),
+          echo: vi
+            .fn()
+            .mockImplementation((msg: string) => Promise.resolve(msg)),
         },
       };
 
@@ -436,6 +477,7 @@ describe("runtime", () => {
     it("should create a server connection", () => {
       const handlers = {
         add: vi.fn().mockResolvedValue(8),
+        echo: vi.fn().mockImplementation((msg: string) => Promise.resolve(msg)),
       };
 
       const connection = createServerConnection(
@@ -454,4 +496,168 @@ describe("runtime", () => {
       expect(connection.transport).toBe(mockTransport);
     });
   });
+
+  describe("standard schema integration", () => {
+    it("validates RPC payloads using Standard Schema helpers", async () => {
+      const client = createClientRuntime(
+        mockTransport,
+        standardSchemaContract,
+        undefined as never,
+        mockOptions,
+      );
+      mockTransport.clearSentMessages();
+
+      await expect(
+        client.rpc.add({ a: 1, b: "oops" } as unknown as {
+          a: number;
+          b: number;
+        }),
+      ).rejects.toThrow(/a and b must be numbers/);
+      expect(mockTransport.getSentMessages()).toHaveLength(0);
+
+      const rpcPromise = client.rpc.add({ a: 2, b: 3 });
+      await flushMicrotasks();
+
+      const sentMessages = mockTransport.getSentMessages();
+      expect(sentMessages).toHaveLength(1);
+      const rpcRequest = sentMessages[0] as Envelope;
+      expect(rpcRequest.kind).toBe("rpc_req");
+      expect(rpcRequest.p).toEqual({ a: 2, b: 3 });
+
+      mockTransport.simulateMessage({
+        v: 1,
+        ts: Date.now(),
+        kind: "rpc_res",
+        id: "test-id-123",
+        ch: "add",
+        p: { sum: "5" },
+      });
+
+      await expect(rpcPromise).resolves.toEqual({ sum: 5 });
+    });
+
+    it("validates emitted events with Standard Schemas", async () => {
+      const client = createClientRuntime(
+        mockTransport,
+        standardSchemaContract,
+        undefined as never,
+        mockOptions,
+      );
+      mockTransport.clearSentMessages();
+
+      client.emit.userJoined({ userId: "user-1", name: " Alice " });
+      await flushMicrotasks();
+
+      const sentMessages = mockTransport.getSentMessages();
+      expect(sentMessages).toHaveLength(1);
+      const eventEnvelope = sentMessages[0] as Envelope;
+      expect(eventEnvelope.kind).toBe("event");
+      expect(eventEnvelope.p).toEqual({ userId: "user-1", name: "Alice" });
+
+      const errorSpy = mockOptions.logger?.error as ViMock | undefined;
+      if (!errorSpy) {
+        throw new Error("logger error mock not configured");
+      }
+      errorSpy.mockClear();
+
+      client.emit.userJoined({ userId: "", name: "Bob" });
+      await flushMicrotasks();
+
+      expect(errorSpy).toHaveBeenCalledWith("emit error", expect.any(Error));
+      expect(mockTransport.getSentMessages()).toHaveLength(1);
+    });
+
+    it("validates inbound events using Standard Schemas", async () => {
+      const client = createClientRuntime(
+        mockTransport,
+        standardSchemaContract,
+        undefined as never,
+        mockOptions,
+      );
+      const handler = vi.fn();
+      client.onEvent("userJoined", handler);
+      const errorSpy = mockOptions.logger?.error as ViMock | undefined;
+      if (!errorSpy) {
+        throw new Error("logger error mock not configured");
+      }
+      errorSpy.mockClear();
+
+      mockTransport.simulateMessage({
+        v: 1,
+        ts: Date.now(),
+        kind: "event",
+        ch: "userJoined",
+        p: { userId: "abc", name: " Eve " },
+      });
+      await flushMicrotasks();
+
+      expect(handler).toHaveBeenCalledWith(
+        { userId: "abc", name: "Eve" },
+        expect.objectContaining({ kind: "event", ch: "userJoined" }),
+      );
+
+      handler.mockClear();
+      errorSpy.mockClear();
+
+      mockTransport.simulateMessage({
+        v: 1,
+        ts: Date.now(),
+        kind: "event",
+        ch: "userJoined",
+        p: { userId: "", name: "Invalid" },
+      });
+      await flushMicrotasks();
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalledWith(
+        "event validation error",
+        expect.any(Error),
+      );
+    });
+
+    it("returns RPC errors when Standard Schema validation fails on the server", async () => {
+      const handlers = {
+        rpcToServer: {
+          add: vi.fn().mockResolvedValue({ sum: 99 }),
+        },
+      };
+
+      let transportCallback: ((transport: Transport) => void) | undefined;
+      const makeTransport = vi.fn((cb: (transport: Transport) => void) => {
+        transportCallback = cb;
+      });
+
+      createServerRuntime(
+        makeTransport,
+        standardSchemaContract,
+        handlers,
+        mockOptions,
+      );
+
+      if (transportCallback) {
+        transportCallback(mockTransport);
+      }
+
+      mockTransport.clearSentMessages();
+
+      mockTransport.simulateMessage({
+        v: 1,
+        ts: Date.now(),
+        kind: "rpc_req",
+        id: "rpc-invalid",
+        ch: "add",
+        p: { a: "oops", b: 3 },
+      });
+      await flushMicrotasks();
+
+      expect(handlers.rpcToServer.add).not.toHaveBeenCalled();
+      const sentMessages = mockTransport.getSentMessages();
+      expect(sentMessages).toHaveLength(1);
+      const errEnvelope = sentMessages[0] as Envelope;
+      expect(errEnvelope.kind).toBe("rpc_err");
+      expect(errEnvelope.m).toMatch(/a and b must be numbers/);
+    });
+  });
 });
+
+type ViMock = ReturnType<typeof vi.fn>;

@@ -57,7 +57,7 @@
     "@types/node": "catalog:",
     "@types/ws": "catalog:",
     "rimraf": "^6.0.1",
-    "tsdown": "^0.15.2",
+    "tsdown": "^0.15.4",
     "tsx": "catalog:",
     "typescript": "catalog:"
   }

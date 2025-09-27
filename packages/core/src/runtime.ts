@@ -20,14 +20,70 @@ import {
   makeBaseEnvelope,
   parseJson,
   runMiddlewares,
+  validateWithStandardSchema,
 } from "./utils.ts";
 
+/**
+ * Tracks the lifecycle of an outbound RPC request waiting for a matching response.
+ */
 interface PendingEntry {
   resolve: (value: unknown) => void;
   reject: (error: unknown) => void;
   timer?: unknown;
 }
 
+/**
+ * Runs descriptor-provided request validators before sending an RPC payload.
+ */
+async function applyRpcRequestValidation(
+  descriptor: RpcDescriptor<unknown, unknown>,
+  value: unknown,
+): Promise<unknown> {
+  if (descriptor.validateReq) {
+    return await descriptor.validateReq(value);
+  }
+  if (descriptor.schemaReq) {
+    return validateWithStandardSchema(descriptor.schemaReq, value);
+  }
+  return value;
+}
+
+/**
+ * Ensures RPC responses conform to the contract before resolving local callers.
+ */
+async function applyRpcResponseValidation(
+  descriptor: RpcDescriptor<unknown, unknown>,
+  value: unknown,
+): Promise<unknown> {
+  if (descriptor.validateRes) {
+    return await descriptor.validateRes(value);
+  }
+  if (descriptor.schemaRes) {
+    return validateWithStandardSchema(descriptor.schemaRes, value);
+  }
+  return value;
+}
+
+/**
+ * Validates event payloads using either user-defined logic or schema metadata.
+ */
+async function applyEventValidation(
+  descriptor: EventDescriptor<unknown>,
+  value: unknown,
+): Promise<unknown> {
+  if (descriptor.validate) {
+    return await descriptor.validate(value);
+  }
+  if (descriptor.schema) {
+    return validateWithStandardSchema(descriptor.schema, value);
+  }
+  return value;
+}
+
+/**
+ * Creates a record of RPC call functions backed by envelopes sent over the transport.
+ * Uses the shared pending map to correlate responses and enforce optional timeouts.
+ */
 function buildRpcCaller(
   methodMap: Record<string, RpcDescriptor<unknown, unknown>>,
   sendEnvelope: (env: Envelope) => void | Promise<void>,
@@ -53,7 +109,6 @@ function buildRpcCaller(
         ...makeBaseEnvelope("rpc_req", version),
         id,
         ch: method,
-        p: descriptor.validateReq ? descriptor.validateReq(req) : req,
       };
       const promise = new Promise<unknown>((resolve, reject) => {
         const timer = options.timeoutMs
@@ -63,24 +118,35 @@ function buildRpcCaller(
             }, options.timeoutMs)
           : undefined;
         pending.set(id, { resolve, reject, timer });
-      });
-      runMiddlewares(middlewares, env, "out")
-        .then(() => sendEnvelope(env))
-        .catch((err) => {
-          const p = pending.get(id);
-          if (p) {
-            p.reject(err);
-            pending.delete(id);
+
+        void (async () => {
+          try {
+            const validated = await applyRpcRequestValidation(descriptor, req);
+            env.p = validated;
+            await runMiddlewares(middlewares, env, "out");
+            await sendEnvelope(env);
+          } catch (err) {
+            const entry = pending.get(id);
+            if (entry) {
+              if (entry.timer) {
+                clearTimeout(entry.timer as unknown as number);
+              }
+              pending.delete(id);
+              entry.reject(err);
+            }
           }
-        });
-      return promise.then((res) =>
-        descriptor.validateRes ? descriptor.validateRes(res) : res,
-      );
+        })();
+      });
+
+      return promise.then((res) => applyRpcResponseValidation(descriptor, res));
     };
   }
   return result;
 }
 
+/**
+ * Bootstraps the client runtime, wiring RPC calls, event emitters, and inbound dispatch.
+ */
 export function createClientRuntime<C extends ContractShape>(
   transport: Transport,
   contract: C,
@@ -109,6 +175,7 @@ export function createClientRuntime<C extends ContractShape>(
   });
 
   transport.onMessage(async (raw) => {
+    // Dispatch inbound envelopes to the appropriate RPC or event handlers.
     const parsed = parseJson(raw);
     if (typeof parsed !== "object" || parsed === null) return;
     const env = parsed as Envelope;
@@ -150,14 +217,10 @@ export function createClientRuntime<C extends ContractShape>(
           return;
         }
         try {
-          const reqPayload = descriptor.validateReq
-            ? descriptor.validateReq(env.p)
-            : env.p;
+          const reqPayload = await applyRpcRequestValidation(descriptor, env.p);
           // biome-ignore lint/suspicious/noExplicitAny: Complex type inference requires any
           const res = await impl(reqPayload as any, env);
-          const resPayload = descriptor.validateRes
-            ? descriptor.validateRes(res)
-            : res;
+          const resPayload = await applyRpcResponseValidation(descriptor, res);
           const resEnv: Envelope = {
             ...makeBaseEnvelope("rpc_res", version),
             id: env.id,
@@ -182,9 +245,19 @@ export function createClientRuntime<C extends ContractShape>(
         if (!env.ch) return;
         const handlersSet = eventHandlers.get(env.ch);
         if (!handlersSet) return;
+        const eventDescriptor = contract.events?.[env.ch];
+        let payload = env.p;
+        if (eventDescriptor) {
+          try {
+            payload = await applyEventValidation(eventDescriptor, env.p);
+          } catch (e) {
+            logger.error("event validation error", e);
+            return;
+          }
+        }
         for (const h of handlersSet) {
           try {
-            await h(env.p, env);
+            await h(payload, env);
           } catch (e) {
             logger.error("event handler error", e);
           }
@@ -212,6 +285,9 @@ export function createClientRuntime<C extends ContractShape>(
     ) as RpcToServerMethods<C>;
   }
 
+  /**
+   * Constructs lazy event emitters that validate payloads before transmission.
+   */
   function buildEmitters(): EventEmitters<C> {
     const def = contract.events ?? {};
     const result: Record<string, (payload: unknown) => void> = {};
@@ -219,22 +295,28 @@ export function createClientRuntime<C extends ContractShape>(
     keys.forEach((name) => {
       const descriptor = def[name] as EventDescriptor<unknown>;
       result[name as string] = (payload: unknown) => {
-        const validated = descriptor.validate
-          ? descriptor.validate(payload)
-          : payload;
-        const env: Envelope = {
-          ...makeBaseEnvelope("event", version),
-          ch: name as string,
-          p: validated,
-        };
-        runMiddlewares(middlewares, env, "out")
-          .then(() => sendEnvelope(env))
-          .catch((e) => logger.error("emit error", e));
+        void (async () => {
+          try {
+            const validated = await applyEventValidation(descriptor, payload);
+            const env: Envelope = {
+              ...makeBaseEnvelope("event", version),
+              ch: name as string,
+              p: validated,
+            };
+            await runMiddlewares(middlewares, env, "out");
+            await sendEnvelope(env);
+          } catch (e) {
+            logger.error("emit error", e);
+          }
+        })();
       };
     });
     return result as EventEmitters<C>;
   }
 
+  /**
+   * Registers an event handler and returns a disposer that removes it again.
+   */
   function onEvent(
     name: string,
     handler: (payload: unknown, meta: Envelope) => void | Promise<void>,
@@ -250,6 +332,9 @@ export function createClientRuntime<C extends ContractShape>(
     };
   }
 
+  /**
+   * Closes transport and rejects any outstanding RPC calls owned by this runtime.
+   */
   function close() {
     transport.close();
     for (const p of pending.values()) {
@@ -271,6 +356,9 @@ export function createClientRuntime<C extends ContractShape>(
   };
 }
 
+/**
+ * Creates a server-side connection wrapper with helpers to call back into clients.
+ */
 export function createServerConnection<C extends ContractShape>(
   transport: Transport,
   contract: C,
@@ -299,6 +387,9 @@ export function createServerConnection<C extends ContractShape>(
   };
 }
 
+/**
+ * Spins up the server runtime by attaching transports and routing envelopes to handlers.
+ */
 export function createServerRuntime<C extends ContractShape>(
   makeTransport: (cb: (t: Transport) => void) => void,
   contract: C,
@@ -314,6 +405,7 @@ export function createServerRuntime<C extends ContractShape>(
   const conns = new Set<ServerConnection<C>>();
 
   function attachTransport(transport: Transport) {
+    // Prepare per-connection state before registering listeners.
     const genId = options.generateId ?? defaultGenerateId;
     const pending = new Map<string, PendingEntry>();
 
@@ -334,6 +426,7 @@ export function createServerRuntime<C extends ContractShape>(
     conns.add(conn);
 
     transport.onMessage(async (raw) => {
+      // Dispatch inbound envelopes to the appropriate RPC or event handlers.
       const parsed = parseJson(raw);
       if (typeof parsed !== "object" || parsed === null) return;
       const env = parsed as Envelope;
@@ -361,14 +454,16 @@ export function createServerRuntime<C extends ContractShape>(
             return;
           }
           try {
-            const reqPayload = descriptor.validateReq
-              ? descriptor.validateReq(env.p)
-              : env.p;
+            const reqPayload = await applyRpcRequestValidation(
+              descriptor,
+              env.p,
+            );
             // biome-ignore lint/suspicious/noExplicitAny: Complex type inference requires any
             const result = await impl(reqPayload as any, env);
-            const resPayload = descriptor.validateRes
-              ? descriptor.validateRes(result)
-              : result;
+            const resPayload = await applyRpcResponseValidation(
+              descriptor,
+              result,
+            );
             const resEnv: Envelope = {
               ...makeBaseEnvelope("rpc_res", version),
               id: env.id,
@@ -408,9 +503,19 @@ export function createServerRuntime<C extends ContractShape>(
           const handler =
             handlers.events?.[name as keyof typeof handlers.events];
           if (!handler) return;
+          const eventDescriptor = contract.events?.[name];
+          let payload = env.p;
+          if (eventDescriptor) {
+            try {
+              payload = await applyEventValidation(eventDescriptor, env.p);
+            } catch (e) {
+              logger.error("event validation error", e);
+              return;
+            }
+          }
           try {
             // biome-ignore lint/suspicious/noExplicitAny: Complex type inference requires any
-            await handler(env.p as any, env);
+            await handler(payload as any, env);
           } catch (e) {
             logger.error("event handler error", e);
           }
@@ -437,9 +542,15 @@ export function createServerRuntime<C extends ContractShape>(
   });
 
   return {
+    /**
+     * Registers a callback that receives newly established server connections.
+     */
     onConnection(cb: (conn: ServerConnection<C>) => void) {
       connectionCallbacks.add(cb);
     },
+    /**
+     * Closes every tracked connection and clears runtime bookkeeping.
+     */
     close() {
       for (const c of conns) {
         c.close();
