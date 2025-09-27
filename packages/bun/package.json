@@ -49,6 +49,7 @@
   },
   "devDependencies": {
     "@tsconfig/bun": "^1.0.8",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@kataribe/internal": "workspace:*"
   }
 }

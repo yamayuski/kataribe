@@ -1,17 +1,67 @@
-import { MockNodeWebSocket } from "@kataribe/internal";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock isomorphic-ws with the shared mock
+// Mock isomorphic-ws with a simple mock
 vi.mock("isomorphic-ws", () => ({
-  default: MockNodeWebSocket,
+  default: class MockWebSocket {
+    public readyState = 1; // OPEN
+    public url: string;
+    public protocols?: string | string[];
+    public sentData: unknown[] = [];
+    private eventListeners: Record<string, Function[]> = {};
+
+    static CONNECTING = 0;
+    static OPEN = 1;
+    static CLOSING = 2;
+    static CLOSED = 3;
+
+    constructor(url: string, protocols?: string | string[]) {
+      this.url = url;
+      this.protocols = protocols;
+      this.readyState = 1; // Start OPEN for simplicity
+    }
+
+    addEventListener(type: string, listener: Function): void {
+      if (!this.eventListeners[type]) {
+        this.eventListeners[type] = [];
+      }
+      this.eventListeners[type].push(listener);
+    }
+
+    removeEventListener(type: string, listener: Function): void {
+      if (this.eventListeners[type]) {
+        const index = this.eventListeners[type].indexOf(listener);
+        if (index > -1) {
+          this.eventListeners[type].splice(index, 1);
+        }
+      }
+    }
+
+    send(data: unknown): void {
+      this.sentData.push(data);
+    }
+
+    close(code?: number, reason?: string): void {
+      this.readyState = 3; // CLOSED
+      const event = { type: "close", code, reason };
+      this.dispatchEvent(event);
+    }
+
+    dispatchEvent(event: any): boolean {
+      const listeners = this.eventListeners[event.type] || [];
+      for (const listener of listeners) {
+        listener(event);
+      }
+      return true;
+    }
+
+    // Test helpers
+    simulateMessage(data: unknown): void {
+      this.dispatchEvent({ type: "message", data });
+    }
+  },
 }));
 
 import { WebSocketTransport } from "./transport.ts";
-
-// Helper type to access private properties for testing
-type TransportWithPrivates = WebSocketTransport & {
-  socket: MockNodeWebSocket;
-};
 
 describe("WebSocketTransport (Node.js)", () => {
   beforeEach(() => {
@@ -22,7 +72,7 @@ describe("WebSocketTransport (Node.js)", () => {
       OPEN: 1,
       CLOSING: 2,
       CLOSED: 3,
-    } as unknown as typeof WebSocket;
+    } as any;
   });
 
   it("should create transport with URL", () => {
@@ -42,7 +92,7 @@ describe("WebSocketTransport (Node.js)", () => {
     const testData = { message: "hello" };
     transport.send(testData);
 
-    const socket = (transport as TransportWithPrivates).socket;
+    const socket = (transport as any).socket;
     expect(socket.sentData).toContain(JSON.stringify(testData));
   });
 
@@ -52,7 +102,7 @@ describe("WebSocketTransport (Node.js)", () => {
     const testData = "hello world";
     transport.send(testData);
 
-    const socket = (transport as TransportWithPrivates).socket;
+    const socket = (transport as any).socket;
     expect(socket.sentData).toContain(testData);
   });
 
@@ -62,7 +112,7 @@ describe("WebSocketTransport (Node.js)", () => {
 
     transport.onMessage(messageListener);
 
-    const socket = (transport as TransportWithPrivates).socket;
+    const socket = (transport as any).socket;
     const testMessage = "test message";
     socket.simulateMessage(testMessage);
 
@@ -76,7 +126,7 @@ describe("WebSocketTransport (Node.js)", () => {
     const unsubscribe = transport.onMessage(messageListener);
     unsubscribe();
 
-    const socket = (transport as TransportWithPrivates).socket;
+    const socket = (transport as any).socket;
     socket.simulateMessage("test message");
 
     expect(messageListener).not.toHaveBeenCalled();
@@ -98,7 +148,7 @@ describe("WebSocketTransport (Node.js)", () => {
       protocols,
     });
 
-    const socket = (transport as TransportWithPrivates).socket;
+    const socket = (transport as any).socket;
     expect(socket.protocols).toBe(protocols);
   });
 });

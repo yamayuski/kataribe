@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "wrangler": "^4.37.0",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@kataribe/internal": "workspace:*"
   }
 }

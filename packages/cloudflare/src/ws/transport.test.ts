@@ -1,61 +1,6 @@
+import { MockCloudflareWebSocket } from "@kataribe/internal";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CloudflareWebSocketTransport } from "./transport.ts";
-
-// Mock Cloudflare WebSocket for testing
-class MockCloudflareWebSocket {
-  public readyState = 1; // OPEN
-  private eventListeners: Record<string, Function[]> = {};
-  public sentData: unknown[] = [];
-  public accepted = false;
-
-  addEventListener(type: string, listener: Function): void {
-    if (!this.eventListeners[type]) {
-      this.eventListeners[type] = [];
-    }
-    this.eventListeners[type].push(listener);
-  }
-
-  accept(): void {
-    this.accepted = true;
-    // Simulate open event after accept
-    setTimeout(() => {
-      this.dispatchEvent({ type: "open" });
-    }, 0);
-  }
-
-  send(data: unknown): void {
-    if (this.readyState === 1) {
-      // OPEN
-      this.sentData.push(data);
-    }
-  }
-
-  close(code?: number, reason?: string): void {
-    this.readyState = 3; // CLOSED
-    this.dispatchEvent({ type: "close", code, reason });
-  }
-
-  dispatchEvent(event: { type: string; [key: string]: unknown }): boolean {
-    const listeners = this.eventListeners[event.type] || [];
-    for (const listener of listeners) {
-      listener(event);
-    }
-    return true;
-  }
-
-  // Helper methods for testing
-  simulateMessage(data: unknown): void {
-    this.dispatchEvent({ type: "message", data });
-  }
-
-  simulateError(): void {
-    this.dispatchEvent({ type: "error" });
-  }
-
-  simulateClose(code = 1000, reason = "test"): void {
-    this.close(code, reason);
-  }
-}
 
 // Mock global WebSocket constants
 beforeEach(() => {
@@ -64,7 +9,7 @@ beforeEach(() => {
     OPEN: 1,
     CLOSING: 2,
     CLOSED: 3,
-  } as any;
+  } as unknown as typeof WebSocket;
 });
 
 describe("CloudflareWebSocketTransport", () => {
@@ -75,7 +20,9 @@ describe("CloudflareWebSocketTransport", () => {
     });
 
     expect(transport).toBeDefined();
-    expect((mockSocket as any).accepted).toBe(true);
+    expect((mockSocket as unknown as MockCloudflareWebSocket).accepted).toBe(
+      true,
+    );
   });
 
   it("should handle onOpen callback", async () => {
@@ -111,7 +58,7 @@ describe("CloudflareWebSocketTransport", () => {
     // Wait for transport to be ready then simulate error
     await new Promise((resolve) => setTimeout(resolve, 10));
 
-    (mockSocket as any).simulateError();
+    (mockSocket as unknown as MockCloudflareWebSocket).simulateError();
     expect(onError).toHaveBeenCalled();
   });
 
@@ -124,7 +71,9 @@ describe("CloudflareWebSocketTransport", () => {
     const testData = { message: "hello" };
     transport.send(testData);
 
-    expect((mockSocket as any).sentData).toContain(JSON.stringify(testData));
+    expect(
+      (mockSocket as unknown as MockCloudflareWebSocket).sentData,
+    ).toContain(JSON.stringify(testData));
   });
 
   it("should send string data as-is", () => {
@@ -136,7 +85,9 @@ describe("CloudflareWebSocketTransport", () => {
     const testData = "hello world";
     transport.send(testData);
 
-    expect((mockSocket as any).sentData).toContain(testData);
+    expect(
+      (mockSocket as unknown as MockCloudflareWebSocket).sentData,
+    ).toContain(testData);
   });
 
   it("should register and call message listeners", () => {
@@ -149,7 +100,9 @@ describe("CloudflareWebSocketTransport", () => {
     transport.onMessage(messageListener);
 
     const testMessage = "test message";
-    (mockSocket as any).simulateMessage(testMessage);
+    (mockSocket as unknown as MockCloudflareWebSocket).simulateMessage(
+      testMessage,
+    );
 
     expect(messageListener).toHaveBeenCalledWith(testMessage);
   });
@@ -164,7 +117,9 @@ describe("CloudflareWebSocketTransport", () => {
     const unsubscribe = transport.onMessage(messageListener);
     unsubscribe();
 
-    (mockSocket as any).simulateMessage("test message");
+    (mockSocket as unknown as MockCloudflareWebSocket).simulateMessage(
+      "test message",
+    );
 
     expect(messageListener).not.toHaveBeenCalled();
   });
@@ -184,7 +139,7 @@ describe("CloudflareWebSocketTransport", () => {
   it("should not send data when WebSocket is not open", () => {
     const mockSocket = new MockCloudflareWebSocket() as unknown as WebSocket;
     // Set socket to closed state
-    (mockSocket as any).readyState = 3; // CLOSED
+    (mockSocket as unknown as MockCloudflareWebSocket).readyState = 3; // CLOSED
 
     const transport = new CloudflareWebSocketTransport({
       webSocket: mockSocket,
@@ -194,6 +149,8 @@ describe("CloudflareWebSocketTransport", () => {
     transport.send(testData);
 
     // Should not have sent any data
-    expect((mockSocket as any).sentData).toHaveLength(0);
+    expect(
+      (mockSocket as unknown as MockCloudflareWebSocket).sentData,
+    ).toHaveLength(0);
   });
 });

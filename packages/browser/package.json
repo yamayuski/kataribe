@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "vitest": "catalog:",
-    "jsdom": "catalog:"
+    "jsdom": "catalog:",
+    "@kataribe/internal": "workspace:*"
   }
 }

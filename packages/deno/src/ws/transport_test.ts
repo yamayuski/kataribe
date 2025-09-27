@@ -31,53 +31,8 @@ function assertThrows(
   }
 }
 
+import { MockDenoWebSocket } from "@kataribe/internal";
 import { WebSocketTransport } from "./transport.ts";
-
-// Mock WebSocket for Deno testing - simple version to avoid timer leaks
-class MockWebSocket {
-  public readyState = 1; // OPEN
-  private eventListeners: Record<string, Function[]> = {};
-  public sentData: unknown[] = [];
-
-  constructor(
-    public url: string,
-    public protocols?: string | string[],
-  ) {
-    // Start as OPEN for simplicity in tests
-    this.readyState = 1; // OPEN
-  }
-
-  addEventListener(type: string, listener: Function): void {
-    if (!this.eventListeners[type]) {
-      this.eventListeners[type] = [];
-    }
-    this.eventListeners[type].push(listener);
-  }
-
-  send(data: unknown): void {
-    this.sentData.push(data);
-  }
-
-  close(code?: number, reason?: string): void {
-    this.readyState = 3; // CLOSED
-    const event = new CloseEvent("close", { code, reason });
-    this.dispatchEvent(event);
-  }
-
-  dispatchEvent(event: Event): boolean {
-    const listeners = this.eventListeners[event.type] || [];
-    for (const listener of listeners) {
-      listener(event);
-    }
-    return true;
-  }
-
-  // Helper method to simulate incoming messages
-  simulateMessage(data: unknown): void {
-    const event = new MessageEvent("message", { data });
-    this.dispatchEvent(event);
-  }
-}
 
 // Mock the global WebSocket constants
 globalThis.WebSocket = {
@@ -85,15 +40,20 @@ globalThis.WebSocket = {
   OPEN: 1,
   CLOSING: 2,
   CLOSED: 3,
-} as any;
+} as unknown as typeof WebSocket;
 
 // Override WebSocket constructor for testing
-// @ts-expect-error
-globalThis.WebSocket = MockWebSocket as any;
+// @ts-expect-error - Mocking global for testing
+globalThis.WebSocket = MockDenoWebSocket;
 globalThis.WebSocket.CONNECTING = 0;
 globalThis.WebSocket.OPEN = 1;
 globalThis.WebSocket.CLOSING = 2;
 globalThis.WebSocket.CLOSED = 3;
+
+// Helper type to access private properties for testing
+type TransportWithPrivates = WebSocketTransport & {
+  socket: MockDenoWebSocket;
+};
 
 Deno.test("WebSocketTransport - should create transport with URL", () => {
   const transport = new WebSocketTransport({ url: "ws://localhost:8080" });
@@ -109,7 +69,7 @@ Deno.test("WebSocketTransport - should throw error when neither url nor existing
 });
 
 Deno.test("WebSocketTransport - should use existing WebSocket when provided", () => {
-  const mockSocket = new MockWebSocket("ws://test") as unknown as WebSocket;
+  const mockSocket = new MockDenoWebSocket("ws://test") as unknown as WebSocket;
   const transport = new WebSocketTransport({ existing: mockSocket });
   assertEquals(typeof transport, "object");
 });
@@ -120,7 +80,7 @@ Deno.test("WebSocketTransport - should send data when WebSocket is open", () => 
   const testData = { message: "hello" };
   transport.send(testData);
 
-  const socket = (transport as any).socket as MockWebSocket;
+  const socket = (transport as TransportWithPrivates).socket;
   assertEquals(socket.sentData.includes(JSON.stringify(testData)), true);
 });
 
@@ -130,7 +90,7 @@ Deno.test("WebSocketTransport - should send string data as-is", () => {
   const testData = "hello world";
   transport.send(testData);
 
-  const socket = (transport as any).socket as MockWebSocket;
+  const socket = (transport as TransportWithPrivates).socket;
   assertEquals(socket.sentData.includes(testData), true);
 });
 
@@ -143,7 +103,7 @@ Deno.test("WebSocketTransport - should register message listeners", () => {
 
   transport.onMessage(messageListener);
 
-  const socket = (transport as any).socket as MockWebSocket;
+  const socket = (transport as TransportWithPrivates).socket;
   const testMessage = "test message";
   socket.simulateMessage(testMessage);
 

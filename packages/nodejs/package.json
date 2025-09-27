@@ -47,6 +47,7 @@
     "@tsconfig/node24": "^24.0.1",
     "@types/node": "catalog:",
     "@types/ws": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@kataribe/internal": "workspace:*"
   }
 }

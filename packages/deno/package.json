@@ -45,6 +45,7 @@
     "@kataribe/core": "workspace:*"
   },
   "devDependencies": {
-    "@tsconfig/deno": "^1.0.11"
+    "@tsconfig/deno": "^1.0.11",
+    "@kataribe/internal": "workspace:*"
   }
 }

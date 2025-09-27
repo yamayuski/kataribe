@@ -1,57 +1,7 @@
 import { defineContract, event, rpc } from "@kataribe/core";
+import { MockWebSocket } from "@kataribe/internal";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createWsClient } from "./client.ts";
-
-// Mock WebSocket for testing (same as transport test)
-class MockWebSocket {
-  public readyState = WebSocket.OPEN;
-  private eventListeners: Record<string, Function[]> = {};
-  public sentData: unknown[] = [];
-
-  constructor(
-    public url: string,
-    public protocols?: string | string[],
-  ) {
-    this.readyState = WebSocket.CONNECTING;
-    setTimeout(() => {
-      this.readyState = WebSocket.OPEN;
-      this.dispatchEvent(new Event("open"));
-    }, 0);
-  }
-
-  addEventListener(type: string, listener: Function): void {
-    if (!this.eventListeners[type]) {
-      this.eventListeners[type] = [];
-    }
-    this.eventListeners[type].push(listener);
-  }
-
-  send(data: unknown): void {
-    this.sentData.push(data);
-  }
-
-  close(code?: number, reason?: string): void {
-    this.readyState = WebSocket.CLOSED;
-    this.dispatchEvent(new CloseEvent("close", { code, reason }));
-  }
-
-  dispatchEvent(event: Event): boolean {
-    const listeners = this.eventListeners[event.type] || [];
-    for (const listener of listeners) {
-      listener(event);
-    }
-    return true;
-  }
-
-  simulateMessage(data: unknown): void {
-    const event = new MessageEvent("message", { data });
-    this.dispatchEvent(event);
-  }
-
-  simulateError(): void {
-    this.dispatchEvent(new Event("error"));
-  }
-}
 
 // Mock the global WebSocket
 beforeEach(() => {

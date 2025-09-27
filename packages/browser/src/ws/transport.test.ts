@@ -1,63 +1,15 @@
+import { MockWebSocket } from "@kataribe/internal";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocketTransport } from "./transport.ts";
 
-// Mock WebSocket for testing
-class MockWebSocket {
-  public readyState = WebSocket.OPEN;
-  private eventListeners: Record<string, Function[]> = {};
-  public sentData: unknown[] = [];
-
-  constructor(
-    public url: string,
-    public protocols?: string | string[],
-  ) {
-    // Start with CONNECTING state and then open
-    this.readyState = WebSocket.CONNECTING;
-    setTimeout(() => {
-      this.readyState = WebSocket.OPEN;
-      this.dispatchEvent(new Event("open"));
-    }, 0);
-  }
-
-  addEventListener(type: string, listener: Function): void {
-    if (!this.eventListeners[type]) {
-      this.eventListeners[type] = [];
-    }
-    this.eventListeners[type].push(listener);
-  }
-
-  send(data: unknown): void {
-    this.sentData.push(data);
-  }
-
-  close(code?: number, reason?: string): void {
-    this.readyState = WebSocket.CLOSED;
-    this.dispatchEvent(new CloseEvent("close", { code, reason }));
-  }
-
-  dispatchEvent(event: Event): boolean {
-    const listeners = this.eventListeners[event.type] || [];
-    for (const listener of listeners) {
-      listener(event);
-    }
-    return true;
-  }
-
-  // Helper method to simulate incoming messages
-  simulateMessage(data: unknown): void {
-    const event = new MessageEvent("message", { data });
-    this.dispatchEvent(event);
-  }
-
-  // Helper method to simulate errors
-  simulateError(): void {
-    this.dispatchEvent(new Event("error"));
-  }
-}
+// Helper type to access private properties for testing
+type TransportWithPrivates = WebSocketTransport & {
+  socket: MockWebSocket;
+};
 
 // Mock the global WebSocket
 beforeEach(() => {
-  // @ts-expect-error
+  // @ts-expect-error - Replacing global for testing
   global.WebSocket = MockWebSocket;
   global.WebSocket.CONNECTING = 0;
   global.WebSocket.OPEN = 1;
@@ -114,7 +66,7 @@ describe("WebSocketTransport", () => {
     await new Promise((resolve) => setTimeout(resolve, 10));
 
     // Access private socket to simulate error
-    const socket = (transport as any).socket as MockWebSocket;
+    const socket = (transport as TransportWithPrivates).socket as MockWebSocket;
     socket.simulateError();
 
     expect(onError).toHaveBeenCalled();
@@ -129,7 +81,7 @@ describe("WebSocketTransport", () => {
     const testData = { message: "hello" };
     transport.send(testData);
 
-    const socket = (transport as any).socket as MockWebSocket;
+    const socket = (transport as TransportWithPrivates).socket as MockWebSocket;
     expect(socket.sentData).toContain(JSON.stringify(testData));
   });
 
@@ -142,7 +94,7 @@ describe("WebSocketTransport", () => {
     const testData = "hello world";
     transport.send(testData);
 
-    const socket = (transport as any).socket as MockWebSocket;
+    const socket = (transport as TransportWithPrivates).socket as MockWebSocket;
     expect(socket.sentData).toContain(testData);
   });
 
@@ -155,7 +107,7 @@ describe("WebSocketTransport", () => {
 
     transport.onMessage(messageListener);
 
-    const socket = (transport as any).socket as MockWebSocket;
+    const socket = (transport as TransportWithPrivates).socket as MockWebSocket;
     const testMessage = "test message";
     socket.simulateMessage(testMessage);
 
@@ -172,7 +124,7 @@ describe("WebSocketTransport", () => {
     const unsubscribe = transport.onMessage(messageListener);
     unsubscribe();
 
-    const socket = (transport as any).socket as MockWebSocket;
+    const socket = (transport as TransportWithPrivates).socket as MockWebSocket;
     socket.simulateMessage("test message");
 
     expect(messageListener).not.toHaveBeenCalled();
