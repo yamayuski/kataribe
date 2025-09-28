@@ -1,6 +1,6 @@
 {
   "name": "@kataribe/internal",
-  "private": true,
+  "version": "0.3.0",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -17,7 +17,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {},
   "keywords": [
