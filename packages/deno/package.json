@@ -27,7 +27,7 @@
   ],
   "scripts": {
     "clean": "npx rimraf dist",
-    "build": "deno bundle --outdir dist --minify --sourcemap src/index.ts && tsc --emitDeclarationOnly",
+    "build": "echo 'Deno package - skipping build as it uses native Deno runtime'",
     "test": "cd src/ws && deno test --no-check transport_test.ts"
   },
   "keywords": [

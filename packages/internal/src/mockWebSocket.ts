@@ -100,7 +100,8 @@ export class MockNodeWebSocket {
 
   close(code?: number, reason?: string): void {
     this.readyState = 3; // CLOSED
-    this.dispatchEvent({ type: "close", code, reason } as Event);
+    const event = new CloseEvent("close", { code, reason });
+    this.dispatchEvent(event);
   }
 
   dispatchEvent(event: Event): boolean {
@@ -113,7 +114,8 @@ export class MockNodeWebSocket {
 
   // Test helpers
   simulateMessage(data: unknown): void {
-    this.dispatchEvent({ type: "message", data } as Event);
+    const event = new MessageEvent("message", { data });
+    this.dispatchEvent(event);
   }
 }
 
@@ -207,7 +209,7 @@ export class MockBunServerWebSocket {
 
 // Mock WebSocket for Deno testing (simple version to avoid timer leaks)
 export class MockDenoWebSocket {
-  public readyState = 1; // OPEN
+  public readyState: number = 1; // OPEN
   private eventListeners: Record<string, EventListener[]> = {};
   public sentData: unknown[] = [];
 
