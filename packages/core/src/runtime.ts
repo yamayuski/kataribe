@@ -398,7 +398,10 @@ export function createServerRuntime<C extends ContractShape>(
     events?: EventHandlerMap<C>;
   },
   options: RuntimeOptions = {},
-) {
+): {
+  onConnection(cb: (conn: ServerConnection<C>) => void): void;
+  close(): void;
+} {
   const version = options.version ?? 1;
   const middlewares = options.middlewares;
   const logger = createLogger(options.logger);
