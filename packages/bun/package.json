@@ -1,6 +1,6 @@
 {
   "name": "@kataribe/bun",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Bun implementation for kataribe - WebSocket, WebRTC",
   "license": "MIT",
   "type": "module",
