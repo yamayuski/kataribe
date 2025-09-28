@@ -7,6 +7,10 @@
     "fmt": "deno fmt",
     "test": "deno test --allow-net"
   },
+  "publish": {
+    "include": ["src/**/*.ts", "LICENSE", "README.md"],
+    "exclude": ["**/node_modules/**", "**/*.test.ts"]
+  },
   "lint": {
     "rules": {
       "tags": ["recommended"]
