@@ -1,6 +1,6 @@
 {
   "name": "@kataribe/browser",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Browser implementation for kataribe - WebSocket, WebRTC, WebTransport",
   "license": "MIT",
   "type": "module",
