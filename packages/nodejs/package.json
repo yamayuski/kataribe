@@ -25,7 +25,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown"
+    "build": "tsdown",
+    "test": "vitest"
   },
   "keywords": [
     "rpc",
@@ -45,6 +46,8 @@
   "devDependencies": {
     "@tsconfig/node24": "^24.0.1",
     "@types/node": "catalog:",
-    "@types/ws": "catalog:"
+    "@types/ws": "catalog:",
+    "vitest": "catalog:",
+    "@kataribe/internal": "workspace:*"
   }
 }

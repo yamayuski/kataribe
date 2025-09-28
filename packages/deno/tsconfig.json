@@ -1,11 +1,20 @@
 {
-  "extends": ["../../tsconfig.json", "@tsconfig/deno/tsconfig.json"],
   "compilerOptions": {
     "outDir": "./dist",
     "declaration": true,
     "declarationDir": "./dist",
-    "lib": ["dom", "es2022"]
+    "lib": ["dom", "es2022", "deno.ns"],
+    "allowImportingTsExtensions": true,
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": false,
+    "types": ["@types/node"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*"],
-  "types": ["@types/node"]
+  "exclude": ["src/**/*.test.ts", "src/**/*_test.ts"]
 }

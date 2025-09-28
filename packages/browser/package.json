@@ -26,7 +26,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown"
+    "build": "tsdown",
+    "test": "vitest"
   },
   "keywords": [
     "rpc",
@@ -41,5 +42,10 @@
   },
   "dependencies": {
     "@kataribe/core": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "catalog:",
+    "jsdom": "catalog:",
+    "@kataribe/internal": "workspace:*"
   }
 }
