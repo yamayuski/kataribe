@@ -24,7 +24,7 @@
     "build": "pnpm --filter \"@kataribe/core\" run build && pnpm --recursive --parallel --if-present --filter=!@kataribe/core run build",
     "test": "pnpm --recursive --parallel --if-present run test",
     "prepublishOnly": "pnpm run build",
-    "publish:npm": "pnpm --recursive --filter \"@kataribe/{core,browser,deno,nodejs,bun,cloudflare}\" publish --access public",
+    "publish:npm": "pnpm exec changeset publish",
     "publish:jsr": "pnpm --recursive --filter \"@kataribe/{core,browser,deno}\" exec jsr publish",
     "format": "biome check --write --unsafe",
     "lint": "biome lint",
