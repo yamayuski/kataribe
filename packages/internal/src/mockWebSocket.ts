@@ -4,7 +4,7 @@ type EventListener = (event: Event) => void;
 
 // Mock WebSocket for browser/general testing
 export class MockWebSocket {
-  public readyState = WebSocket.OPEN;
+  public readyState: number = WebSocket.OPEN;
   private eventListeners: Record<string, EventListener[]> = {};
   public sentData: unknown[] = [];
 
