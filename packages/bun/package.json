@@ -25,7 +25,10 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md"
   ],
   "scripts": {
     "clean": "npx rimraf dist",
@@ -41,9 +44,6 @@
     "bun",
     "typescript"
   ],
-  "engines": {
-    "node": ">=22"
-  },
   "dependencies": {
     "@kataribe/core": "workspace:*"
   },

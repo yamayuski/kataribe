@@ -25,7 +25,10 @@
   },
   "files": [
     "dist",
-    "src"
+    "src",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md"
   ],
   "scripts": {
     "build": "npx wrangler types src/worker-configuration.d.ts && tsc --emitDeclarationOnly",
@@ -38,9 +41,6 @@
     "workers",
     "typescript"
   ],
-  "engines": {
-    "node": ">=22"
-  },
   "dependencies": {
     "@kataribe/core": "workspace:*"
   },

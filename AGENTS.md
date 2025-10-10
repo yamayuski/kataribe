@@ -1,236 +1,200 @@
 # Copilot Instructions for Kataribe
 
-This document provides comprehensive guidance for GitHub Copilot coding agents
-working on the **kataribe** repository.
+このドキュメントは、GitHub Copilot コーディングエージェントが monorepo 化された
+「kataribe」リポジトリで作業する際のガイドです。現行のディレクトリ構成、ビルド、
+スクリプト、テスト戦略に合わせて記載しています。
 
-## Repository Overview
+## リポジトリ概要
 
-**kataribe** is a TypeScript library for bidirectional (client ↔ server) RPC +
-fire-and-forget events over WebSocket with type-safe, `unknown`-only core
-envelope abstraction (no `any`). It's designed as an npm package library with
-strict type safety and no `any` types in the source code.
+Kataribe は、型安全な unknown-only のエンベロープを使ってクライアント↔サーバーの
+双方向 RPC とイベント配信を行うライブラリです。monorepo として複数のランタイム
+ターゲット（Browser / Node.js / Deno / Bun / Cloudflare
+Workers）をサポートします。
 
-### Key Features
+### 主な特徴
 
-- Client→Server RPC (`rpcToServer`) and Server→Client RPC (`rpcToClient`) using
-  a single envelope protocol
-- Fire-and-forget events
-- Contract DSL with optional runtime validators
-- Middleware (in/out) for auth, tracing, compression hooks
-- Never `any` in source; strict generics and `unknown` types
-- Basic WebSocket transport (browser + Node `ws`)
-- Bundled outputs: ESM, CJS, UMD + type declarations
+- 単一のエンベローププロトコルによる双方向 RPC（Client→Server / Server→Client）
+- Fire-and-forget イベント
+- コントラクト DSL（任意でランタイムバリデータを併用可能）
+- in/out ミドルウェア（認可、トレース、圧縮などのフック）
+- ソースコードは any 不使用・unknown ベースの厳格な型付け
+- トランスポート: WebSocket
+  を中心に、WebRTC（Browser/Node）、WebTransport（Deno）
 
-## Technology Stack
+## 技術スタック
 
-- **Language**: TypeScript (strict mode, no `any` types)
-- **Runtime**: Node.js >=22
-- **Package Manager**: pnpm
-- **Build System**: tsdown for bundling, TypeScript compiler for declarations
-- **Code Quality**: Biome for linting, formatting, and CI checks
-- **Dependencies**:
-  - `ws` for WebSocket implementation
-  - Development tools: `@biomejs/biome`, `tsdown`, `tsx`, `typescript`
+- 言語: TypeScript（strict, any 不使用）
+- 実行環境: Node.js >= 22（開発・ビルド）
+- パッケージマネージャ: pnpm
+- ビルド: tsdown（主要パッケージ）、tsc（型定義）、bun build（Bun パッケージ）、
+  Deno ネイティブ（Deno パッケージ）
+- 品質: Biome（lint/format/CI）
+- テスト: Vitest（多くのパッケージ）、Bun Test（Bun）、Deno Test（Deno）
 
-## Project Structure
+## モノレポの構成
 
 ```
-├── src/                    # Source code
-│   ├── index.ts           # Main exports
-│   ├── runtime.ts         # Core runtime logic
-│   ├── types.ts           # Type definitions
-│   ├── utils.ts           # Utility functions
-│   └── transports/        # Transport implementations
-│       ├── ws/            # WebSocket transport
-│       └── webrtc/        # WebRTC DataChannel transport
-├── examples/              # Example implementations
-│   ├── contract.ts        # Contract definition example
-│   ├── node-server.ts     # Node.js server example
-│   ├── node-client.ts     # Node.js client example
-│   ├── browser-client.ts  # Browser client example
-│   ├── webrtc-signaling-server.ts  # WebRTC signaling server
-│   ├── webrtc-peer.html   # WebRTC browser P2P demo
-│   └── webrtc-node-client.ts       # WebRTC Node.js example
-├── dist/                  # Build outputs (generated)
-└── package.json           # Package configuration
+/                          # ルート（pnpm ワークスペース）
+├─ packages/
+│  ├─ core/               # 型/ランタイム中核（types, runtime, utils）
+│  ├─ browser/            # ブラウザ向け（WS, WebRTC）
+│  ├─ nodejs/             # Node.js 向け（WS, WebRTC）
+│  ├─ deno/               # Deno 向け（WS, WebTransport）
+│  ├─ bun/                # Bun 向け（WS）
+│  ├─ cloudflare/         # Cloudflare Workers 向け（WS/DO）
+│  └─ internal/           # テスト支援・内部ユーティリティ
+├─ examples/
+│  ├─ nodejs-ws/          # Node.js WS サーバ/クライアント例
+│  ├─ deno-ws/            # Deno WS サーバ例
+│  ├─ bun-ws/             # Bun WS サーバ例
+│  ├─ browser-client/     # ブラウザクライアント例（静的 HTML）
+│  └─ shared/             # 例で共有するコントラクト
+├─ biome.json
+├─ package.json
+├─ pnpm-workspace.yaml
+└─ tsconfig.json
 ```
 
-## Development Workflow
+参考: 中核ファイルは `packages/core/src/` 配下（`index.ts`, `runtime.ts`,
+`types.ts`, `utils.ts`）。各ランタイム実装は各パッケージの `src/` 配下にあります
+（例: `packages/browser/src/ws`, `packages/nodejs/src/ws`,
+`packages/browser/src/webrtc`, `packages/deno/src/wt` など）。
 
-### Available npm Scripts
+## ルートスクリプト（pnpm）
 
-| Script                 | Description                                            | Usage                          |
-| ---------------------- | ------------------------------------------------------ | ------------------------------ |
-| `build`                | Complete build: clean + declarations + ESM + CJS + UMD | `npm run build`                |
-| `clean`                | Clean dist directory                                   | `npm run clean`                |
-| `build:types`          | Generate TypeScript declarations                       | `npm run build:types`          |
-| `build:esm`            | Build ESM bundle                                       | `npm run build:esm`            |
-| `build:cjs`            | Build CommonJS bundle                                  | `npm run build:cjs`            |
-| `build:umd`            | Build UMD bundle                                       | `npm run build:umd`            |
-| `format`               | Format code with Biome (auto-fix)                      | `npm run format`               |
-| `lint`                 | Lint code with Biome                                   | `npm run lint`                 |
-| `check`                | Run Biome CI checks                                    | `npm run check`                |
-| `dev:server`           | Run example server                                     | `npm run dev:server`           |
-| `dev:client`           | Run example node client                                | `npm run dev:client`           |
-| `dev:webrtc-signaling` | Run WebRTC signaling server                            | `npm run dev:webrtc-signaling` |
+`package.json` の主要スクリプト（ルートから実行）:
 
-### Development Process
+- `pnpm build` — まず `@kataribe/core`
+  をビルドし、その後他パッケージを並列ビルド
+- `pnpm test` — 各パッケージのテストを並列実行（存在するもののみ）
+- `pnpm format` — Biome によるフォーマット（自動修正）
+- `pnpm lint` — Biome による Lint
+- `pnpm check` — Biome CI チェック
+- 開発用例:
+  - `pnpm dev:server` — `examples/nodejs-ws/server.ts`
+  - `pnpm dev:client` — `examples/nodejs-ws/client.ts`
+  - `pnpm dev:deno` — `examples/deno-ws/server.ts`
+  - `pnpm dev:bun` — `examples/bun-ws/server.ts`
 
-1. **Install dependencies**: `npm install`
-2. **Run checks**: `npm run check` (lint + format verification)
-3. **Format code**: `npm run format` (auto-fix formatting issues)
-4. **Build**: `npm run build` (full build pipeline)
-5. **Test examples**: `npm run dev:server` + `npm run dev:client`
+その他:
 
-## Build System
+- `preinstall` で `only-allow pnpm` を使用
+- `publish:jsr` — `@kataribe/core`, `@kataribe/browser`, `@kataribe/deno` を JSR
+  公開
+- Changesets によるバージョン管理/公開補助（`ci:version`, `ci:publish`）
 
-The project uses **esbuild** for fast bundling and **TypeScript compiler** for
-type declarations:
+エンジン制約: Node >= 22、pnpm >= 10.17.1
 
-### Build Outputs (dist/)
+## パッケージごとのビルド/出力/テスト概要
 
-- `index.mjs` - ESM bundle
-- `index.cjs` - CommonJS bundle
-- `kataribe.umd.js` - UMD bundle for browsers
-- `index.d.ts` + related `.d.ts` files - Type declarations
+- `@kataribe/core`
+  - ビルド: tsdown
+  - 出力: CJS `dist/index.cjs`, ESM `dist/index.js`, 型 `dist/index.d.cts`
+  - テスト: Vitest
 
-### Build Configuration
+- `@kataribe/browser`
+  - ビルド: tsdown
+  - 出力: ESM `dist/index.js`, 型 `dist/index.d.ts`
+  - テスト: Vitest（jsdom）
 
-- **Platform-neutral ESM** for maximum compatibility
-- **Node.js-optimized CJS** for legacy Node environments
-- **Browser-compatible UMD** with global `Kataribe` namespace
-- **Source maps** generated for all bundles
-- **Tree-shaking friendly** with `sideEffects: false`
+- `@kataribe/nodejs`
+  - ビルド: tsdown
+  - 出力: CJS `dist/index.cjs`, 型 `dist/index.d.cts`
+  - テスト: Vitest
 
-## Architecture & Code Organization
+- `@kataribe/deno`
+  - ビルド: 生成物なし（Deno ネイティブを想定）
+  - 出力: ソース（`src/`）+ 型（宣言のみ必要時）
+  - テスト: `deno test`（WS、WebTransport 実装あり）
 
-### Core Concepts
+- `@kataribe/bun`
+  - ビルド: `bun build` + `tsc --emitDeclarationOnly`
+  - 出力: `dist/index.js`, 型 `dist/index.d.ts`
+  - テスト: Bun Test
 
-1. **Envelope Protocol**: All communication uses type-safe envelope abstraction
-   - Structure: `{ v, ts, id?, kind, ch?, p?, m?, code?, meta?, feat? }`
-   - Types: `rpc_req`, `rpc_res`, `rpc_err`, `event`, `hello`
+- `@kataribe/cloudflare`
+  - ビルド: `wrangler types` で環境型生成 + `tsc` で型定義出力
+  - 出力: `src/`（実装はソース参照）, 型 `dist/index.d.ts`
+  - テスト: Vitest
 
-2. **Contract DSL**: Type-safe contract definitions
-   ```typescript
-   const contract = defineContract({
-     rpcToServer: { methodName: rpc<Req, Res>() },
-     rpcToClient: { methodName: rpc<Req, Res>() },
-     events: { eventName: event<Payload>() },
-   });
-   ```
+- `@kataribe/internal`
+  - テスト補助/モックなど（ビルド/配布対象外）
 
-3. **Runtime System**: Client and server runtimes with middleware support
+注: 旧 UMD バンドルはありません。パッケージごとに ESM/CJS/型の構成が異なります。
 
-4. **Transport Layer**: Pluggable transport system (currently WebSocket)
+## アーキテクチャ（要点）
 
-### Key Files & Responsibilities
+1. エンベローププロトコル
+   - 形: `{ v, ts, id?, kind, ch?, p?, m?, code?, meta?, feat? }`
+   - 種別: `rpc_req`, `rpc_res`, `rpc_err`, `event`, `hello`
+2. コントラクト DSL
+   - 例:
+     ```ts
+     const contract = defineContract({
+       rpcToServer: { method: rpc<Req, Res>() },
+       rpcToClient: { method: rpc<Req, Res>() },
+       events: { event: event<Payload>() },
+     });
+     ```
+3. ランタイム（`@kataribe/core`）
+   - 送受信、ミドルウェア、ID 生成、ロギングなど
+4. トランスポート
+   - Browser/Node: WebSocket, WebRTC（DataChannel）
+   - Deno: WebSocket, WebTransport
 
-- **`src/types.ts`**: Core type definitions, no runtime code
-- **`src/runtime.ts`**: Client/server runtime implementations
-- **`src/utils.ts`**: Utility functions (ID generation, middleware execution,
-  logging)
-- **`src/index.ts`**: Public API exports
-- **`src/transports/ws/`**: WebSocket transport implementation
+### 型安全のガイドライン
 
-### Type Safety Guidelines
+- any を使わず unknown と厳格なジェネリクスで表現
+- 可能ならランタイムバリデーションを併用
+- すべての通信はエンベロープ型で表現
 
-- **NO `any` types** - Use `unknown` instead
-- **Strict generics** - All type parameters must be properly constrained
-- **Runtime validation** - Use optional validators in contract definitions
-- **Envelope typing** - All communication typed through envelope system
+## コーディング規約
 
-## Code Style & Conventions
+- Biome
+  によるフォーマット/リンティング（`pnpm format`/`pnpm lint`/`pnpm check`）
+- TypeScript 慣習
+  - オブジェクトは `interface`、合成/ユニオンは `type`
+  - リテラルは `as const` を活用
+  - ジェネリクスは意味のある名前（`Req`, `Res`, `Payload`）
+  - 明示的な import/export を推奨
 
-### Biome Configuration
+## 例と手動テスト
 
-The project uses Biome for consistent code style:
+- Node.js WebSocket（2 ターミナル）
+  - サーバ: `pnpm dev:server`
+  - クライアント: `pnpm dev:client`
+- Deno WebSocket: `pnpm dev:deno`
+- Bun WebSocket: `pnpm dev:bun`
+- Browser クライアント: `examples/browser-client/index.html` を静的サーバで配信
+  （任意の静的サーバで OK）
 
-- **Formatting**: Automatic formatting with `npm run format`
-- **Linting**: Static analysis with `npm run lint`
-- **CI checks**: Combined checks with `npm run check`
+## 作業の進め方（推奨）
 
-### TypeScript Conventions
+1. 依存関係のインストール: `pnpm i`
+2. 事前チェック: `pnpm check`
+3. 実装/修正 → `pnpm format` / `pnpm lint`
+4. ビルド: `pnpm build`
+5. テスト: `pnpm test`（必要に応じて各パッケージで）
 
-- Use `interface` for object shapes
-- Use `type` for unions, intersections, and computed types
-- Prefer `const` assertions for literal types
-- Use meaningful generic parameter names (`Req`, `Res`, `Payload`)
+プッシュ前チェック: 必ず `pnpm check` を実行し、CI 体裁を満たすこと。
 
-### Import/Export Patterns
+## CI/CD（概略）
 
-- Use explicit imports/exports
-- Group imports: external modules, then internal modules
-- Re-export from `index.ts` for public API
+- Node 24 系での動作確認
+- Biome CI（`pnpm check`）
+- ビルド検証（`pnpm build`）
 
-## Testing & Examples
+## トラブルシューティング
 
-### Example Applications
+- ビルド失敗: 各パッケージのビルド方法に注意（tsdown / tsc / bun / Deno）。
+- フォーマット/Lint: `pnpm format` / `pnpm lint` を実行。
+- 依存解決: pnpm ワークスペースのリンク状態を確認。
+- 型エラー: any を使わず unknown を活用、ジェネリクス制約を見直す。
 
-The `examples/` directory contains working implementations:
+## ロードマップ（抜粋）
 
-- **Contract definition** (`contract.ts`) - Shows contract DSL usage
-- **Server implementation** (`node-server.ts`) - WebSocket server with RPC
-  handlers
-- **Node client** (`node-client.ts`) - Node.js client implementation
-- **Browser client** (`browser-client.ts`) - Browser-compatible client
-
-### Manual Testing
-
-```bash
-# Terminal 1: Start server
-npm run dev:server
-
-# Terminal 2: Run client
-npm run dev:client
-```
-
-## Package.json Scripts Helper
-
-When working on this repository, always use the provided npm scripts:
-
-- **Before making changes**: `npm run check` to verify current state
-- **During development**: `npm run format` to fix formatting
-- **Before committing**: `npm run build` to ensure everything builds
-- **Before pushing**: **ALWAYS run `npm run check`** to ensure no errors
-- **For testing**: Use `npm run dev:server` and `npm run dev:client`
-
-### Important: Pre-Push Validation
-
-**CRITICAL**: Always run `npm run check` before pushing changes to ensure no
-biome CI errors. This prevents CI failures and maintains code quality standards.
-
-## CI/CD
-
-**GitHub Actions**:
-
-- Node.js 24 testing
-- Biome CI checks (`npm run check`)
-- Build verification (`npm run build`)
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Build failures**: Check TypeScript errors, run `npm run build:types` first
-2. **Format issues**: Run `npm run format` to auto-fix
-3. **Import errors**: Verify file extensions (`.ts`) and relative paths
-4. **Type errors**: Ensure no `any` types, use `unknown` instead
-
-### Development Tips
-
-- Use `tsx` for running TypeScript directly in development
-- Check `examples/` for usage patterns
-- Refer to `src/types.ts` for core type definitions
-- Use middleware for cross-cutting concerns (auth, logging, etc.)
-
-## Roadmap Features
-
-When implementing new features, consider these planned additions:
-
-- ~~WebRTC DataChannel transport~~ ✅ **IMPLEMENTED**
-- Additional transports: WebTransport / HTTP/2
-- Stream RPC (chunked)
-- RPC cancellation (rpc_cancel)
-- Schema integration (zod/valibot)
-- Reconnect + session resume
-- Encryption / compression middleware examples
+- WebRTC DataChannel 既実装（Browser/Node）
+- Deno WebTransport 実装あり
+- 追加トランスポート（HTTP/2 等）
+- ストリーム RPC、RPC キャンセル、スキーマ統合（zod/valibot）
+- 再接続/セッション再開、暗号化/圧縮の例

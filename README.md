@@ -1,4 +1,9 @@
-# Kataribe
+# Kataribe - 語り部
+
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yamayuski/kataribe/continuous-integration.yaml)
+![NPM Downloads](https://img.shields.io/npm/dw/%40kataribe%2Fcore)
+![GitHub License](https://img.shields.io/github/license/yamayuski/kataribe)
+![NPM Version](https://img.shields.io/npm/v/%40kataribe%2Fcore)
 
 Kataribe is transport-and-runtime-agnostic TypeScript packages for bidirectional
 (client ↔ server) RPC + fire-and-forget events over WebSocket with a type-safe,
@@ -25,13 +30,54 @@ Kataribe is transport-and-runtime-agnostic TypeScript packages for bidirectional
 | Bun                | ✅        | ✅     | ✖                |
 | Browsers           | ✅        | ✅     | ✅(experimental) |
 
-## WIP: Install (after publish)
+## Installation
+
+### node.js
 
 ```bash
-npm install kataribe
+npm install @kataribe/nodejs
+# or
+yarn add @kataribe/nodejs
+# or
+pnpm add @kataribe/nodejs
 ```
 
-## Quick Example
+### deno
+
+```bash
+deno install jsr:@kataribe/deno
+```
+
+### cloudflare workers
+
+```bash
+npm install @kataribe/cloudflare
+# or
+yarn add @kataribe/cloudflare
+# or
+pnpm add @kataribe/cloudflare
+```
+
+### bun
+
+```bash
+bun add @kataribe/bun
+```
+
+### browser
+
+```ts
+import {
+  createWebRtcClient,
+  createWebTransportClient,
+  createWsClient,
+  defineContract,
+  event,
+  rpc,
+} from "https://esm.sh/@kataribe/browser@latest";
+```
+
+## Quick Example(node.js)
 
 ```ts
 import {
@@ -40,7 +86,7 @@ import {
   defineContract,
   event,
   rpc,
-} from "kataribe";
+} from "@kataribe/nodejs";
 
 const contract = defineContract({
   rpcToServer: {
@@ -135,11 +181,9 @@ GitHub Actions: Node 24, biome ci, build. Publish step scaffolded (commented).
 
 ## Roadmap
 
-- ~~WebRTC DataChannel transport~~ ✅ **DONE**
 - Additional transports: WebTransport / HTTP/2
 - Stream RPC (chunked)
 - RPC cancellation (rpc_cancel)
-- ~~Schema integration (zod/valibot)~~ ✅ **DONE** (Standard Schema support)
 - Reconnect + session resume
 - Encryption / compression middleware examples
 
