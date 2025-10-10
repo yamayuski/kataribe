@@ -22,7 +22,10 @@
   },
   "files": [
     "dist",
-    "src"
+    "src",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md"
   ],
   "scripts": {},
   "keywords": [

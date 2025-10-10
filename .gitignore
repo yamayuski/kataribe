@@ -5,3 +5,8 @@ dist/
 *.log*
 .pnpm-store/
 packages/cloudflare/src/worker-configuration.d.ts
+certs/
+.vscode/
+.idea/
+coverage/
+.env
