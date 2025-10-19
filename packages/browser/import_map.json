@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "@kataribe/core": "jsr:@kataribe/core@0.4.0"
+  }
+}

@@ -21,10 +21,10 @@
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
     "prebuild": "pnpm --recursive --parallel exec rimraf dist",
-    "build": "pnpm --filter \"@kataribe/core\" run build && pnpm --recursive --parallel --if-present --filter=!@kataribe/core run build",
+    "build": "pnpm --filter=@kataribe/core run build && pnpm --recursive --parallel --if-present --filter=!@kataribe/core run build",
     "test": "pnpm --recursive --parallel --if-present run test",
     "prepublishOnly": "pnpm run build",
-    "publish:jsr": "pnpm --recursive --filter=@kataribe/core --filter=@kataribe/browser --filter=@kataribe/deno exec jsr publish",
+    "publish:jsr": "pnpm --filter=@kataribe/core exec jsr publish && pnpm --recursive --parallel --filter=@kataribe/browser --filter=@kataribe/deno exec jsr publish",
     "ci:version": "pnpm exec changeset version",
     "ci:publish": "pnpm exec changeset publish",
     "format": "biome check --write --unsafe",
