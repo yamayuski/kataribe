@@ -1,6 +1,6 @@
 {
   "name": "@kataribe/cloudflare",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Cloudflare Workers implementation for kataribe - WebSocket with Durable Objects",
   "license": "MIT",
   "type": "module",
