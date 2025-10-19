@@ -1,6 +1,6 @@
 {
   "name": "@kataribe/nodejs",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Node.js implementation for kataribe - WebSocket, WebRTC",
   "license": "MIT",
   "type": "module",
